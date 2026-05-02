@@ -1327,8 +1327,17 @@ extension MenuBarItemManager {
             }
 
             noSectionCount += 1
-            MenuBarItemManager.diagLog.warning("Couldn't find section for caching \(item.logString) bounds=\(NSStringFromRect(item.bounds)), assigning to hidden")
-            context.cache[.hidden].append(item)
+            let currentBounds = Bridging.getWindowBounds(for: item.windowID) ?? item.bounds
+            if currentBounds.origin.x == -1 {
+                MenuBarItemManager.diagLog.warning(
+                    "Skipping \(item.logString) — blocked (x=-1), will retry on next cache tick"
+                )
+            } else {
+                MenuBarItemManager.diagLog.warning(
+                    "Couldn't find section for caching \(item.logString) bounds=\(NSStringFromRect(item.bounds)), assigning to hidden"
+                )
+                context.cache[.hidden].append(item)
+            }
         }
 
         // Count invalid items
@@ -1360,7 +1369,21 @@ extension MenuBarItemManager {
         if !isRestoringItemOrder, !isResettingLayout, !isInStartupSettling,
            temporarilyShownItemContexts.isEmpty
         {
-            saveSectionOrder(from: context.cache)
+            // Don't persist if any items are in a transient blocked state (x=-1).
+            // Wait for the next cache cycle when bounds are reliable.
+            let hasBlockedItems = MenuBarSection.Name.allCases.contains { section in
+                context.cache[section].contains { item in
+                    let bounds = Bridging.getWindowBounds(for: item.windowID) ?? item.bounds
+                    return bounds.origin.x == -1
+                }
+            }
+            if !hasBlockedItems {
+                saveSectionOrder(from: context.cache)
+            } else {
+                MenuBarItemManager.diagLog.debug(
+                    "Skipping saveSectionOrder — blocked items detected (x=-1), will retry on next cache tick"
+                )
+            }
         }
         MenuBarItemManager.diagLog.debug("Updated menu bar item cache: visible=\(context.cache[.visible].count), hidden=\(context.cache[.hidden].count), alwaysHidden=\(context.cache[.alwaysHidden].count)")
     }
@@ -4294,22 +4317,15 @@ extension MenuBarItemManager {
             {
                 savedSection = fallback
             } else {
-                // No saved section for this item. If it's in a hidden zone,
-                // move it to visible — it was never intentionally placed there
-                // (e.g. macOS placed it past a divider after an app relaunch
-                // or a profile change shifted section boundaries).
-                if currentSection != .visible,
-                   let visibleCtrl = items.first(where: { $0.tag == .visibleControlItem })
-                {
-                    MenuBarItemManager.diagLog.info(
-                        "Relocating unsaved item \(item.logString) from \(currentSection.logString) to visible"
+                // No saved section for this item. Respect macOS placement
+                // rather than pulling to visible — macOS knows why it put
+                // the item in a hidden zone (e.g. new app, profile change).
+                // The item will be picked up by saveSectionOrder on the next
+                // cache cycle and persisted at its current position.
+                if currentSection != .visible {
+                    MenuBarItemManager.diagLog.debug(
+                        "Keeping unsaved item \(item.logString) in \(currentSection.logString) — macOS placement respected"
                     )
-                    do {
-                        try await move(item: item, to: .rightOfItem(visibleCtrl), skipInputPause: true)
-                    } catch {
-                        MenuBarItemManager.diagLog.error("Failed to relocate unsaved item \(item.logString): \(error)")
-                    }
-                    return true
                 }
                 continue
             }
