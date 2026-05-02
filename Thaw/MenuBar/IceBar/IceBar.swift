@@ -247,6 +247,15 @@ final class IceBarPanel: NSPanel {
         currentSection = nil
         appState?.navigationState.isIceBarPresented = false
     }
+
+    /// Resizes the panel to match the hosting view's intrinsic content size.
+    func resizeToContent() {
+        guard let contentView, let screen else { return }
+        let ideal = contentView.intrinsicContentSize
+        guard ideal != .zero, ideal != frame.size else { return }
+        setFrame(NSRect(origin: frame.origin, size: ideal), display: true, animate: false)
+        updateOrigin(for: screen)
+    }
 }
 
 // MARK: - IceBarHostingView
@@ -254,6 +263,11 @@ final class IceBarPanel: NSPanel {
 private final class IceBarHostingView: NSHostingView<IceBarContentView> {
     override var safeAreaInsets: NSEdgeInsets {
         NSEdgeInsets()
+    }
+
+    override func layout() {
+        super.layout()
+        (window as? IceBarPanel)?.resizeToContent()
     }
 
     init(
