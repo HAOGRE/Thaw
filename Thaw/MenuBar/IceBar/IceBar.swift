@@ -367,6 +367,25 @@ private struct IceBarContentView: View {
         return widths.max() ?? maxHeight
     }
 
+    /// Per-column maximum widths for the grid layout.
+    private var columnWidths: [CGFloat] {
+        guard let maxHeight = itemMaxHeight, maxHeight > 0 else { return [] }
+        let allItems = items
+        let rows = stride(from: 0, to: allItems.count, by: gridColumns).map { start in
+            Array(allItems[start ..< Swift.min(start + gridColumns, allItems.count)])
+        }
+        return (0 ..< gridColumns).map { col in
+            rows.compactMap { row in
+                guard col < row.count else { return nil }
+                guard let cachedImage = imageCache.images[row[col].tag] else { return nil }
+                let image = cachedImage.nsImage
+                guard image.size.height > 0 else { return image.size.width }
+                let scale = maxHeight / image.size.height
+                return image.size.width * scale
+            }.max() ?? 0
+        }
+    }
+
     /// Maximum content height for vertical and grid layouts so the panel
     /// does not extend below the visible screen area.
     private var maxContentHeight: CGFloat {
@@ -604,8 +623,8 @@ private struct IceBarContentView: View {
                         }
                         ForEach(Array(rows.enumerated()), id: \.offset) { rowIndex, rowItems in
                             HStack(spacing: itemSpacing) {
-                                ForEach(rowItems, id: \.windowID) { item in
-                                    IceBarItemView(
+                                ForEach(Array(rowItems.enumerated()), id: \.element.windowID) { colIndex, item in
+                                    let itemView = IceBarItemView(
                                         imageCache: imageCache,
                                         itemManager: itemManager,
                                         menuBarManager: menuBarManager,
@@ -617,14 +636,19 @@ private struct IceBarContentView: View {
                                         tooltipDelay: appState.settings.advanced.tooltipDelay,
                                         isLightBackground: isLightBackground
                                     )
-                                    .frame(width: maxItemWidth, alignment: .center)
+                                    if rows.count > 1 {
+                                        itemView
+                                            .frame(width: columnWidths[colIndex], alignment: .center)
+                                    } else {
+                                        itemView
+                                    }
                                 }
                                 // Only pad the last row when there are multiple rows,
                                 // so partial rows align with the columns above.
                                 if rows.count > 1, rowIndex == rows.count - 1, rowItems.count < gridColumns {
-                                    ForEach(0 ..< (gridColumns - rowItems.count), id: \.self) { _ in
+                                    ForEach(rowItems.count ..< gridColumns, id: \.self) { colIndex in
                                         Color.clear
-                                            .frame(width: maxItemWidth, height: contentHeight)
+                                            .frame(width: columnWidths[colIndex], height: contentHeight)
                                     }
                                 }
                             }
