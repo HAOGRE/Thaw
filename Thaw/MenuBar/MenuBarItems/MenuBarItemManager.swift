@@ -663,11 +663,7 @@ final class MenuBarItemManager: ObservableObject {
     }
 
     private func persistedNewItemsAnchorIdentifier(for item: MenuBarItem) -> String {
-        let namespace = item.tag.namespace.description
-        if DynamicItemOverrides.isDynamic(namespace) {
-            return namespace
-        }
-        return item.uniqueIdentifier
+        item.uniqueIdentifier
     }
 
     private func resolvedNewItemsAnchorIndex(
@@ -701,11 +697,7 @@ final class MenuBarItemManager: ObservableObject {
     }
 
     private func stableNewItemsAnchorIdentifier(from identifier: String) -> String {
-        let namespace = identifier.split(separator: ":", maxSplits: 1).first.map(String.init) ?? identifier
-        if DynamicItemOverrides.isDynamic(namespace) {
-            return namespace
-        }
-        return identifier
+        identifier
     }
 
     private func defaultNewItemsBadgeIndex(in section: MenuBarSection.Name, itemCount: Int) -> Int {
@@ -4226,41 +4218,20 @@ extension MenuBarItemManager {
         MenuBarItemManager.diagLog.debug("restoreItemsToSavedSections: waiting for menu bar to settle...")
         try? await Task.sleep(for: .milliseconds(500))
 
-        // Build lookups from savedSectionOrder:
-        // 1. baseIdentifier (namespace:title) → saved section (handles instanceIndex changes)
-        // 2. namespace string → saved section (fallback for dynamic-title apps only)
+        // Build a lookup from savedSectionOrder:
+        // baseIdentifier (namespace:title) → saved section (handles instanceIndex changes)
         //
         // We use baseIdentifier instead of uniqueIdentifier to handle apps that change
         // instanceIndex after restart. For apps with multiple items, each has a different
         // baseIdentifier so there's no collision.
         var savedSectionForBaseID = [String: MenuBarSection.Name]()
-        var savedSectionByNamespace = [String: MenuBarSection.Name]()
-        var namespaceSectionCounts = [String: [MenuBarSection.Name: Int]]()
         for (sectionKeyString, identifiers) in savedSectionOrder {
             guard let section = sectionName(for: sectionKeyString) else { continue }
             for identifier in identifiers {
                 // Extract base identifier (namespace:title, without instanceIndex)
                 let baseID = identifier.split(separator: ":", maxSplits: 2).prefix(2).joined(separator: ":")
                 savedSectionForBaseID[baseID] = section
-
-                // Count namespace occurrences per section for majority-vote fallback.
-                // Dynamic-title apps (Dato, Raycast, etc.) change their item title
-                // on every appearance, so baseID matching fails. We resolve namespace
-                // ambiguity by picking the section where most of that namespace's items
-                // were saved, rather than giving up entirely.
-                let ns = identifier.split(separator: ":", maxSplits: 1).first.map(String.init) ?? identifier
-                namespaceSectionCounts[ns, default: [:]][section, default: 0] += 1
             }
-        }
-        // Tiebreak: prefer visible > hidden > alwaysHidden when counts equal.
-        let sectionOrder = MenuBarSection.Name.allCases
-        for (ns, counts) in namespaceSectionCounts {
-            savedSectionByNamespace[ns] = counts.max(by: { a, b in
-                if a.value != b.value { return a.value < b.value }
-                let aIdx = sectionOrder.firstIndex(of: a.key) ?? 0
-                let bIdx = sectionOrder.firstIndex(of: b.key) ?? 0
-                return aIdx > bIdx
-            })?.key ?? .hidden
         }
 
         // Classify current items by physical position.
@@ -4278,17 +4249,10 @@ extension MenuBarItemManager {
 
             guard let currentSection = context.findSection(for: item) else { continue }
 
-            // Look up saved section: prefer base identifier match (handles instanceIndex changes),
-            // then fall back to namespace-only for dynamic apps.
-            let namespaceString = item.tag.namespace.description
             let baseIdentifier = "\(item.tag.namespace):\(item.tag.title)"
             let savedSection: MenuBarSection.Name
             if let baseMatch = savedSectionForBaseID[baseIdentifier] {
                 savedSection = baseMatch
-            } else if DynamicItemOverrides.isDynamic(namespaceString),
-                      let fallback = savedSectionByNamespace[namespaceString]
-            {
-                savedSection = fallback
             } else {
                 // No saved section for this item. Respect macOS placement
                 // rather than pulling to visible — macOS knows why it put
@@ -4374,10 +4338,10 @@ extension MenuBarItemManager {
     /// recreated by an app restart), not when items were merely repositioned
     /// (user drag). This prevents undoing the user's manual reordering.
     ///
-    /// - Note: For apps with dynamic item titles (see `DynamicItemOverrides`),
-    ///   this function restores the **section** but not the intra-section order,
-    ///   because the saved position key includes the old title which no longer
-    ///   matches the new item.
+    /// - Note: Items with titles that change each appearance (Dato, Fantastical)
+    ///   get their **section** restored via baseIdentifier matching. If the item's
+    ///   title hasn't been seen before, it falls through to the "keep macOS
+    ///   placement" path and is picked up by the next saveSectionOrder cycle.
     ///
     /// Returns `true` if any items were moved.
     /// Returns the best-known bounds for a menu bar item.
