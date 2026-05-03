@@ -122,17 +122,33 @@ jobs:
             -exportPath build/Export \
             -exportOptionsPlist "$export_plist"
 
-          echo "Signing XPC Service..."
-          codesign --force --options runtime --timestamp \
-            --sign "Developer ID Application" \
-            --team-id "$APPLE_TEAM_ID" \
-            "$APP_PATH/Contents/XPCServices/MenuBarItemService.xpc"
+          SPARKLE="$APP_PATH/Contents/Frameworks/Sparkle.framework"
 
-          echo "Signing Sparkle..."
-          find "$APP_PATH/Contents/Frameworks/Sparkle.framework" -type f -perm +111 \
-            -exec codesign --force --options runtime --timestamp \
-            --sign "Developer ID Application" \
-            --team-id "$APPLE_TEAM_ID" {} \;
+          sign_bundle() {
+            codesign --force --options runtime --timestamp \
+              --sign "Developer ID Application" \
+              --team-id "$APPLE_TEAM_ID" \
+              "$1"
+          }
+
+          echo "Signing XPC Service..."
+          sign_bundle "$APP_PATH/Contents/XPCServices/MenuBarItemService.xpc"
+
+          echo "Signing Sparkle sub-bundles (inside-out)..."
+          for bundle in \
+            "$SPARKLE/Versions/B/XPCServices/Downloader.xpc" \
+            "$SPARKLE/Versions/B/XPCServices/Installer.xpc" \
+            "$SPARKLE/Versions/B/Updater.app"; do
+            [ -e "$bundle" ] && sign_bundle "$bundle"
+          done
+
+          echo "Signing Sparkle framework..."
+          sign_bundle "$SPARKLE"
+
+          echo "Signing other embedded frameworks..."
+          for fw in "$APP_PATH/Contents/Frameworks/"*.framework; do
+            [ "$(basename "$fw")" != "Sparkle.framework" ] && sign_bundle "$fw"
+          done
 
           echo "Signing Main App Bundle with Runtime Entitlements..."
           codesign --force --options runtime --timestamp \
