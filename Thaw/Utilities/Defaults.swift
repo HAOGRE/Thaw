@@ -171,7 +171,7 @@ extension Defaults {
         static let showOnHoverDelay: TimeInterval = 0.2
         static let tooltipDelay: TimeInterval = 0.5
         static let showMenuBarTooltips = false
-        static let iconRefreshInterval: TimeInterval = 0.5
+        static let iconRefreshInterval: TimeInterval = 0.1
         static let enableDiagnosticLogging = false
         static let useLCSSortingOnNotchedDisplays = false
         static let useOptionClickToShowAlwaysHiddenSection = false
