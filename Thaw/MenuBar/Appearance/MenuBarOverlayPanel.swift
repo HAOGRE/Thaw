@@ -358,6 +358,12 @@ final class MenuBarOverlayPanel: NSPanel, @unchecked Sendable {
                 self?.alphaValue = isHidden ? 0 : 1
             }
             .store(in: &c)
+
+            appState.appearanceManager.$configuration
+                .sink { [weak self] _ in
+                    self?.updateWindowLevel()
+                }
+                .store(in: &c)
         }
 
         cancellables = c
@@ -453,6 +459,7 @@ final class MenuBarOverlayPanel: NSPanel, @unchecked Sendable {
             height: menuBarHeight + 5
         )
 
+        updateWindowLevel()
         alphaValue = 0
         setFrame(newFrame, display: true)
         orderFrontRegardless()
@@ -489,6 +496,18 @@ final class MenuBarOverlayPanel: NSPanel, @unchecked Sendable {
         #if DEBUG
             diagLog.debug("Overlay panel closed. Active windows: \(NSApplication.shared.windows.count)")
         #endif
+    }
+
+    /// Moves the panel behind the menu bar whenever a tint or shape is active
+    /// so the menu bar's own blur blends the content and items stay crisp.
+    private func updateWindowLevel() {
+        guard let appState else { return }
+        let config = appState.appearanceManager.configuration
+        if config.current.tintKind != .noTint || config.shapeKind != .noShape {
+            level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.statusWindow)) - 1)
+        } else {
+            level = .statusBar
+        }
     }
 
     override func isAccessibilityElement() -> Bool {
@@ -927,6 +946,11 @@ private final class MenuBarOverlayPanelContentView: NSView {
     }
 
     /// Draws the tint defined by the given configuration in the given rectangle.
+    ///
+    /// When the panel sits behind the menu bar (`statusWindow - 1`), the menu bar's
+    /// own visual-effect layer blends the tint naturally. When at `.statusBar` level
+    /// (`.noTint` with shape/border/shadow), the semi-transparent black provides a
+    /// subtle darkening.
     private func drawTint(in rect: CGRect) {
         switch configuration.tintKind {
         case .noTint:
@@ -934,13 +958,14 @@ private final class MenuBarOverlayPanelContentView: NSView {
             rect.fill()
         case .solid:
             if let tintColor = NSColor(cgColor: configuration.tintColor)?
-                .withAlphaComponent(0.2)
+                .withAlphaComponent(configuration.tintOpacity)
             {
                 tintColor.setFill()
                 rect.fill()
             }
         case .gradient:
-            if let tintGradient = configuration.tintGradient.withAlpha(0.2)
+            if let tintGradient = configuration.tintGradient
+                .withAlpha(configuration.tintOpacity)
                 .nsGradient(using: .displayP3)
             {
                 tintGradient.draw(in: rect, angle: 0)

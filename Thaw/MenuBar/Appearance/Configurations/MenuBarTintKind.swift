@@ -9,7 +9,7 @@
 import SwiftUI
 
 /// A type that specifies how the menu bar is tinted.
-enum MenuBarTintKind: Int, CaseIterable, Codable, Identifiable {
+enum MenuBarTintKind: Int, CaseIterable, Identifiable {
     /// The menu bar is not tinted.
     case noTint = 0
     /// The menu bar is tinted with a solid color.
@@ -27,6 +27,24 @@ enum MenuBarTintKind: Int, CaseIterable, Codable, Identifiable {
         case .noTint: "None"
         case .solid: "Solid"
         case .gradient: "Gradient"
+        }
+    }
+}
+
+extension MenuBarTintKind: Codable {
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(Int.self)
+        if rawValue == 3 {
+            self = .solid // legacy blackout → solid
+        } else {
+            guard let value = MenuBarTintKind(rawValue: rawValue) else {
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Invalid MenuBarTintKind: \(rawValue)"
+                )
+            }
+            self = value
         }
     }
 }

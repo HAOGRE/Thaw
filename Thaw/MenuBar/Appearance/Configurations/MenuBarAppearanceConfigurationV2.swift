@@ -113,6 +113,7 @@ struct MenuBarAppearancePartialConfiguration: Hashable {
     var tintKind: MenuBarTintKind
     var tintColor: CGColor
     var tintGradient: IceGradient
+    var tintOpacity: Double
 }
 
 // MARK: Default Partial Configuration
@@ -125,7 +126,8 @@ extension MenuBarAppearancePartialConfiguration {
         borderWidth: 1,
         tintKind: .noTint,
         tintColor: .black,
-        tintGradient: .defaultMenuBarTint
+        tintGradient: .defaultMenuBarTint,
+        tintOpacity: 0.2
     )
 }
 
@@ -143,6 +145,7 @@ extension MenuBarAppearancePartialConfiguration: Codable {
         case tintKind
         case tintColor
         case tintGradient
+        case tintOpacity
     }
 
     init(from decoder: Decoder) throws {
@@ -154,7 +157,8 @@ extension MenuBarAppearancePartialConfiguration: Codable {
             borderWidth: container.decodeIfPresent(Double.self, forKey: .borderWidth) ?? Self.defaultConfiguration.borderWidth,
             tintKind: container.decodeIfPresent(MenuBarTintKind.self, forKey: .tintKind) ?? Self.defaultConfiguration.tintKind,
             tintColor: container.decodeIfPresent(IceColor.self, forKey: .tintColor)?.cgColor ?? Self.defaultConfiguration.tintColor,
-            tintGradient: container.decodeIfPresent(IceGradient.self, forKey: .tintGradient) ?? Self.defaultConfiguration.tintGradient
+            tintGradient: container.decodeIfPresent(IceGradient.self, forKey: .tintGradient) ?? Self.defaultConfiguration.tintGradient,
+            tintOpacity: container.decodeIfPresent(Double.self, forKey: .tintOpacity) ?? Self.defaultConfiguration.tintOpacity
         )
     }
 
@@ -167,5 +171,6 @@ extension MenuBarAppearancePartialConfiguration: Codable {
         try container.encode(tintKind, forKey: .tintKind)
         try container.encode(IceColor(cgColor: tintColor), forKey: .tintColor)
         try container.encode(tintGradient, forKey: .tintGradient)
+        try container.encode(tintOpacity, forKey: .tintOpacity)
     }
 }

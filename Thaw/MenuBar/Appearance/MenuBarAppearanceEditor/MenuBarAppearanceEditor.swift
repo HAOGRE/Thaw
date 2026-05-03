@@ -160,6 +160,7 @@ private struct UnlabeledPartialEditor: View {
         VStack(spacing: .iceFormDefaultSpacing) {
             IceSection {
                 tintPicker
+                tintOpacity
                 shadowToggle
             }
             IceSection {
@@ -200,6 +201,22 @@ private struct UnlabeledPartialEditor: View {
                 }
             }
             .frame(height: 24)
+        }
+    }
+
+    @ViewBuilder
+    private var tintOpacity: some View {
+        if configuration.tintKind != .noTint {
+            LabeledContent("Opacity") {
+                IceSlider(
+                    value: $configuration.tintOpacity,
+                    in: 0 ... 1,
+                    step: 0.05,
+                    showsValue: false
+                ) {
+                    Text(configuration.tintOpacity, format: .percent.precision(.fractionLength(0)))
+                }
+            }
         }
     }
 
