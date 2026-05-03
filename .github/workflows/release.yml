@@ -70,23 +70,6 @@ jobs:
             --team-id "$APPLE_TEAM_ID" \
             --keychain "$keychain"
 
-      - name: Create Entitlements File
-        run: |
-          cat <<EOF > Thaw.entitlements
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>com.apple.security.cs.allow-jit</key>
-              <true/>
-              <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
-              <true/>
-              <key>com.apple.security.cs.disable-library-validation</key>
-              <true/>
-          </dict>
-          </plist>
-          EOF
-
       - name: Build
         run: |
           xcodebuild archive \
@@ -122,48 +105,13 @@ jobs:
             -exportPath build/Export \
             -exportOptionsPlist "$export_plist"
 
-          SPARKLE="$APP_PATH/Contents/Frameworks/Sparkle.framework"
-
-          sign_bundle() {
-            codesign --force --options runtime --timestamp \
-              --sign "Developer ID Application" \
-              --team-id "$APPLE_TEAM_ID" \
-              "$1"
-          }
-
-          echo "Signing XPC Service..."
-          sign_bundle "$APP_PATH/Contents/XPCServices/MenuBarItemService.xpc"
-
-          echo "Signing Sparkle sub-bundles (inside-out)..."
-          for bundle in \
-            "$SPARKLE/Versions/B/XPCServices/Downloader.xpc" \
-            "$SPARKLE/Versions/B/XPCServices/Installer.xpc" \
-            "$SPARKLE/Versions/B/Updater.app"; do
-            [ -e "$bundle" ] && sign_bundle "$bundle"
-          done
-
-          echo "Signing Sparkle framework..."
-          sign_bundle "$SPARKLE"
-
-          echo "Signing other embedded frameworks..."
-          for fw in "$APP_PATH/Contents/Frameworks/"*.framework; do
-            [ "$(basename "$fw")" != "Sparkle.framework" ] && sign_bundle "$fw"
-          done
-
-          echo "Signing Main App Bundle with Runtime Entitlements..."
-          codesign --force --options runtime --timestamp \
-            --entitlements Thaw.entitlements \
-            --sign "Developer ID Application" \
-            --team-id "$APPLE_TEAM_ID" \
-            "$APP_PATH"
-
           echo "Verifying signature..."
           codesign -vvv --deep --strict "$APP_PATH"
 
           echo "Creating DMG..."
           dmg_staging="$RUNNER_TEMP/dmg-staging"
           mkdir -p "$dmg_staging"
-          cp -r "build/Export/${{ env.APP_NAME }}" "$dmg_staging/"
+          ditto "build/Export/${{ env.APP_NAME }}" "$dmg_staging/${{ env.APP_NAME }}"
           ln -s /Applications "$dmg_staging/Applications"
 
           hdiutil create \
