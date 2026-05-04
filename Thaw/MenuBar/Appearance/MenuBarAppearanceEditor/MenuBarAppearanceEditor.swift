@@ -73,7 +73,9 @@ struct MenuBarAppearanceEditor: View {
                 )
             }
 
-            isDynamicToggle
+            IceSection {
+                isDynamicToggle
+            }
 
             if appearanceManager.configuration.isDynamic {
                 LabeledBackgroundEditor(configuration: $appearanceManager.configuration, appearance: .light)
@@ -183,9 +185,8 @@ private struct UnlabeledBackgroundEditor: View {
         if configuration.backgroundKind != .none, configuration.backgroundKind != .glass {
             backgroundOpacity
         }
-        backgroundShadowToggle
         if configuration.backgroundKind == .glass {
-            LabeledContent("Glass") {
+            LabeledContent("Effect") {
                 IcePicker("Glass Style", selection: $configuration.backgroundGlassStyle) {
                     ForEach(MenuBarGlassStyle.allCases, id: \.self) { style in
                         Text(style.localized).tag(style)
@@ -194,6 +195,7 @@ private struct UnlabeledBackgroundEditor: View {
                 .labelsHidden()
             }
         }
+        backgroundShadowToggle
     }
 
     var body: some View {
@@ -396,7 +398,7 @@ private struct UnlabeledShapeEditor: View {
     @ViewBuilder
     private var tintOpacity: some View {
         if configuration.tintKind == .glass {
-            LabeledContent("Glass") {
+            LabeledContent("Effect") {
                 IcePicker("Glass Style", selection: $configuration.tintGlassStyle) {
                     ForEach(MenuBarGlassStyle.allCases, id: \.self) { style in
                         Text(style.localized).tag(style)

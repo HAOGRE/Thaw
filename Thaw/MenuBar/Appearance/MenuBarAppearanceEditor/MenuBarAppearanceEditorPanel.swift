@@ -177,31 +177,26 @@ private final class MenuBarAppearanceEditorHostingController: NSHostingControlle
 
     func updatePreferredContentSize() {
         guard let appState else {
-            preferredContentSize = NSSize(width: 525, height: 630)
+            preferredContentSize = NSSize(width: 525, height: 745)
             return
         }
         let configuration = appState.appearanceManager.configuration
-        let baseHeight: CGFloat = configuration.isDynamic ? 675 : 455
+        let baseHeight: CGFloat = configuration.isDynamic ? 755 : 555
         let shapeBonus: CGFloat = configuration.shapeKind == .noShape ? 0 : 105
         let headingBonus: CGFloat = 32
-        let calloutBonus: CGFloat = {
-            let current = configuration.current
-            guard current.tintKind != .noTint || configuration.shapeKind != .noShape || current.backgroundKind != .none else { return 0 }
-            return 80
-        }()
         let tintOpacityBonus: CGFloat = {
             guard configuration.shapeKind != .noShape, !configuration.isDynamic, configuration.current.tintKind != .noTint else { return 0 }
-            return 40
+            return 80
         }()
         let backgroundBonus: CGFloat = {
             guard configuration.current.backgroundKind != .none else { return 0 }
-            var height: CGFloat = 80 // style picker + opacity + shadow
+            var height: CGFloat = 45 // style picker + opacity + shadow
             if configuration.current.backgroundHasBorder {
-                height += 60 // border color + width
+                height += 80 // border color + width
             }
             return height
         }()
-        preferredContentSize = NSSize(width: 525, height: baseHeight + shapeBonus + headingBonus + calloutBonus + tintOpacityBonus + backgroundBonus)
+        preferredContentSize = NSSize(width: 525, height: baseHeight + shapeBonus + headingBonus + tintOpacityBonus + backgroundBonus)
         view.setFrameSize(preferredContentSize)
     }
 }
