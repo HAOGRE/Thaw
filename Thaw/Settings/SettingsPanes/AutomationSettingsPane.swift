@@ -31,7 +31,7 @@ struct AutomationSettingsPane: View {
         IceSection(options: [.isBordered]) {
             VStack(alignment: .leading, spacing: 12) {
                 Toggle("Enable Settings URI Scheme", isOn: $settings.isSettingsURIEnabled)
-                    .annotation("Allow external applications to read and modify Thaw settings via thaw:// URLs.")
+                    .annotation("Allow external applications to read and modify \(Constants.displayName) settings via thaw:// URLs.")
 
                 if !settings.isSettingsURIEnabled {
                     securityNote
