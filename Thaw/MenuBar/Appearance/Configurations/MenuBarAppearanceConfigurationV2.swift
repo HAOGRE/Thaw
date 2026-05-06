@@ -170,9 +170,6 @@ extension MenuBarAppearancePartialConfiguration: Codable {
         case hasBorder
         case borderColor
         case borderWidth
-        case shapeKind
-        case fullShapeInfo
-        case splitShapeInfo
         case tintKind
         case tintColor
         case tintGradient
