@@ -130,6 +130,12 @@ final class ProfileManager: ObservableObject {
                 diagLog.debug("No active Focus Filter on startup: \(error)")
             }
             // No Focus Filter — fall back to display-based profile.
+            // The spacing apply runs unconditionally; its no-op guard
+            // skips the relaunch when on-disk values already match the
+            // active profile's offset, but if the user is booting on a
+            // display whose profile has a different offset than the last
+            // session left on-disk, the relaunch must happen here or the
+            // apps will continue rendering with the wrong spacing.
             if let currentUUID = lastActiveDisplayUUID {
                 await self.applyProfileForDisplay(uuid: currentUUID)
             }
@@ -217,7 +223,15 @@ final class ProfileManager: ObservableObject {
     }
 
     /// Applies a profile's settings to the running app state.
+    ///
+    /// The menu bar item spacing offset is applied after the snapshot is
+    /// pushed, driving the per-profile spacing behaviour. The no-op guard
+    /// inside applyOffset skips the relaunch when the on-disk values
+    /// already match, so identical-offset switches cost nothing.
     func applyProfile(_ profile: Profile, to appState: AppState) {
+        diagLog.debug(
+            "applyProfile entered: name=\(profile.name)"
+        )
         profile.generalSettings.apply(to: appState.settings.general)
         profile.advancedSettings.apply(to: appState.settings.advanced)
 
@@ -270,7 +284,58 @@ final class ProfileManager: ObservableObject {
         let itemOrder = profile.menuBarLayout.itemOrder ?? [:]
         layoutGeneration &+= 1
         let generation = layoutGeneration
+        // Run the spacing apply BEFORE the layout pass. Otherwise the two
+        // race: applyOffset() kills and relaunches every menu bar app, so
+        // any positioning the layout task did up to that point is wiped
+        // when items reappear at the OS default insertion point. The
+        // no-op guard inside applyOffset() returns immediately when the
+        // on-disk values already match, so identical-offset switches add
+        // no latency.
+        //
+        // After the relaunch wave, restart a settling period so
+        // applyProfileLayout's wait-for-settling loop blocks until items
+        // have actually re-attached. Without this, the settling flag is
+        // false (no performSetup to set it), the wait passes through, and
+        // applyProfileLayout positions items that haven't come back yet,
+        // leaving them at OS-default positions.
         layoutTask = Task { [weak self] in
+            // Preflight settling: flip isInStartupSettling on BEFORE the
+            // wave so cacheItemsRegardless skips late-arriver detection
+            // and scheduleProfileResort short-circuits while apps are
+            // dying and respawning. Without this, on a notch display
+            // each intermediate cache cycle triggers a partial full-sort
+            // that gets cancelled by the next; only the run after the
+            // wave settles produces the correct layout.
+            appState.itemManager.startSettlingPeriod(reason: "spacingRelaunch:preflight")
+
+            let didRelaunch: Bool
+            let recovered: Set<String>
+            do {
+                let outcome = try await appState.spacingManager.applyOffset()
+                didRelaunch = outcome.didRelaunch
+                recovered = outcome.recoveredBundleIDs
+            } catch is CancellationError {
+                // The task was cancelled, typically because a newer
+                // layoutTask is taking over. Drop the preflight settling
+                // and bail out so we don't apply a stale layout pass on
+                // top of the new task's work.
+                appState.itemManager.cancelSettlingPeriod(reason: "spacingRelaunch:cancelled")
+                return
+            } catch {
+                self?.diagLog.error("spacingRelaunch: applyOffset failed: \(error)")
+                didRelaunch = false
+                recovered = []
+            }
+            if didRelaunch {
+                appState.itemManager.startSettlingPeriod(
+                    reason: "spacingRelaunch",
+                    expectedBundleIDs: recovered
+                )
+            } else {
+                // No-op apply: nothing churned, drop the preflight so the
+                // following applyProfileLayout proceeds without waiting.
+                appState.itemManager.cancelSettlingPeriod(reason: "spacingRelaunch:noOp")
+            }
             await appState.itemManager.applyProfileLayout(
                 pinnedHidden: pinnedHidden,
                 pinnedAlwaysHidden: pinnedAlwaysHidden,
@@ -660,6 +725,28 @@ final class ProfileManager: ObservableObject {
         diagLog.info("Focus Filter deactivated — reverting to display profile")
         if let uuid = Bridging.getActiveMenuBarDisplayUUID() {
             await applyProfileForDisplay(uuid: uuid)
+        }
+    }
+
+    /// Re-applies the currently active profile, driving its layout pass
+    /// without changing which profile is active.
+    ///
+    /// Used by DisplaySettingsManager.applyActiveDisplaySpacing after it
+    /// fires a relaunch wave whose menu bar items reattach at OS-default
+    /// positions: the auto-switch path doesn't fire when the active display
+    /// keeps the same associated profile, so without an explicit re-apply
+    /// the layout would never run and the items would stay where macOS put
+    /// them. The applyOffset inside layoutTask no-ops (the on-disk values
+    /// were just written), and the subsequent applyProfileLayout awaits
+    /// the in-flight expected-set settling before running.
+    func reapplyActiveProfile() {
+        guard let appState else { return }
+        guard let activeID = activeProfileID else { return }
+        do {
+            let profile = try loadProfile(id: activeID)
+            applyProfile(profile, to: appState)
+        } catch {
+            diagLog.error("reapplyActiveProfile failed: \(error)")
         }
     }
 
