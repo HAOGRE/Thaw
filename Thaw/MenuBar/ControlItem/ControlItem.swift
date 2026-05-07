@@ -733,6 +733,15 @@ final class ControlItem {
         checkForUpdatesItem.target = self
         menu.addItem(checkForUpdatesItem)
 
+        let supportItem = NSMenuItem(
+            title: String(localized: "Support \(Constants.displayName)…"),
+            action: #selector(openDonateURL),
+            keyEquivalent: ""
+        )
+        supportItem.image = NSImage(systemSymbolName: "heart.circle.fill", accessibilityDescription: "Support")
+        supportItem.target = self
+        menu.addItem(supportItem)
+
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(
@@ -791,6 +800,11 @@ final class ControlItem {
             return
         }
         appState.updatesManager.checkForUpdates()
+    }
+
+    /// Opens the donate URL.
+    @objc private func openDonateURL() {
+        NSWorkspace.shared.open(Constants.donateURL)
     }
 }
 
