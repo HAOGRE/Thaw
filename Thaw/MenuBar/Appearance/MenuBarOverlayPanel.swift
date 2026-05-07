@@ -95,6 +95,9 @@ final class MenuBarOverlayPanel: NSPanel, @unchecked Sendable {
     /// The context that manages panel update tasks.
     private let updateTaskContext = UpdateTaskContext()
 
+    /// Retry task for show() when it fails due to unsettled Window Server.
+    private var showRetryTask: Task<Void, Never>?
+
     /// The shared app state.
     private(set) weak var appState: AppState?
 
@@ -450,12 +453,17 @@ final class MenuBarOverlayPanel: NSPanel, @unchecked Sendable {
         // Validate before showing to ensure panel should be visible on this screen.
         let windows = WindowInfo.createWindows(option: .onScreen)
         guard validate(for: .showing, with: windows) else {
+            scheduleShowRetry()
             return
         }
 
         guard let menuBarHeight = owningScreen.getMenuBarHeight() else {
+            scheduleShowRetry()
             return
         }
+
+        showRetryTask?.cancel()
+        showRetryTask = nil
 
         let newFrame = CGRect(
             x: owningScreen.frame.minX,
@@ -476,6 +484,19 @@ final class MenuBarOverlayPanel: NSPanel, @unchecked Sendable {
         }
     }
 
+    /// Schedules a retry of show() after a delay when validation or
+    /// menu bar height was not available (e.g. during a display change
+    /// before the Window Server has settled). Only the latest retry
+    /// is kept; cancelled if show() succeeds in the meantime.
+    private func scheduleShowRetry() {
+        showRetryTask?.cancel()
+        showRetryTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled else { return }
+            await MainActor.run { self?.needsShow = true }
+        }
+    }
+
     /// Workaround to release owningScreen reference since it's a let constant
     /// We can't change owningScreen to var because it's used throughout the panel,
     /// but we can clear other references to help with deallocation
@@ -487,6 +508,8 @@ final class MenuBarOverlayPanel: NSPanel, @unchecked Sendable {
     }
 
     override func close() {
+        showRetryTask?.cancel()
+        showRetryTask = nil
         // Cancel all pending update tasks to prevent memory leaks
         updateTaskContext.cancelAllTasks()
         // Clear publishers to release references
