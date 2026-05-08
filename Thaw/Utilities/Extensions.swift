@@ -708,7 +708,6 @@ extension NSScreen {
     func getMenuBarHeight() -> CGFloat? {
         let id = displayID
         if let cached = NSScreen.displayCache.withLock({ $0.menuBarHeights[id] }), cached > 0 {
-            Self.diagLog.debug("getMenuBarHeight: display=\(id) returnedCached=\(Double(cached))")
             return cached
         }
         guard let menuBarWindow = WindowInfo.menuBarWindow(for: id) else {
