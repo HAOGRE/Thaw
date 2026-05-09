@@ -49,6 +49,13 @@ struct MenuBarItemTag: Hashable, CustomStringConvertible {
             !(namespace.isUUID && title == "AudioVideoModule")
     }
 
+    /// A Boolean value that indicates whether this tag represents a
+    /// dynamically-named Control Center item (Live Activities, etc.)
+    /// with the pattern `controlCenter:Item-\d+`.
+    var isControlCenterGenericItem: Bool {
+        namespace == .controlCenter && title.wholeMatch(of: /Item-\d+/) != nil
+    }
+
     /// A Boolean value that indicates whether the item identified
     /// by this tag is a control item owned by Ice.
     var isControlItem: Bool {

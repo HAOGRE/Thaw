@@ -39,7 +39,14 @@ struct MenuBarItem: CustomStringConvertible {
 
     /// A Boolean value that indicates whether this item can be hidden.
     var canBeHidden: Bool {
-        tag.canBeHidden
+        tag.canBeHidden && !isTransientControlCenterItem
+    }
+
+    /// A Boolean value that indicates whether this item is a transient
+    /// Control Center module (e.g. Live Activities) with a generic
+    /// `Item-\d+` title. These are treated like screen recording indicators.
+    var isTransientControlCenterItem: Bool {
+        tag.isControlCenterGenericItem && sourcePID != nil
     }
 
     /// A Boolean value that indicates whether this item is one of Ice's
@@ -454,11 +461,6 @@ extension MenuBarItem {
         }
 
         assignStableInstanceIndices(to: &items, using: windows)
-
-        for item in items {
-            let srcBundle = item.sourceApplication?.bundleIdentifier ?? item.owningApplication?.bundleIdentifier ?? "nil"
-            diagLog.debug("item: \(item.logString) ns=\(item.tag.namespace) title=\(item.tag.title) srcPID=\(item.sourcePID ?? -1) srcBundle=\(srcBundle) winTitle=\(item.title ?? "nil")")
-        }
 
         let nilPIDItems = items.filter { $0.sourcePID == nil }
         if !nilPIDItems.isEmpty {

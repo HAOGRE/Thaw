@@ -5550,7 +5550,7 @@ extension MenuBarItemManager {
                 else { continue }
                 if transientTags.contains(where: {
                     $0.namespace == item.tag.namespace && $0.title == item.tag.title
-                }) {
+                }) || item.isTransientControlCenterItem {
                     continue
                 }
                 nonProfileFootprint += item.bounds.width
