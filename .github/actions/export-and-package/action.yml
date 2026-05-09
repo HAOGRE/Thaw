@@ -17,6 +17,10 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install create-dmg
+      shell: bash
+      run: brew install create-dmg
+
     - name: Export archive and create signed DMG
       shell: bash
       env:
@@ -42,16 +46,28 @@ runs:
 
         codesign -vvv --deep --strict "build/Export/$APP_NAME"
 
-        dmg_staging="$RUNNER_TEMP/dmg-staging"
-        mkdir -p "$dmg_staging"
-        ditto "build/Export/$APP_NAME" "$dmg_staging/$APP_NAME"
-        ln -s /Applications "$dmg_staging/Applications"
         vol_name="${APP_NAME%.app}"
-        hdiutil create \
-          -volname "$vol_name" \
-          -srcfolder "$dmg_staging" \
-          -ov -format UDZO \
-          "build/$DMG_NAME"
+        staging="$RUNNER_TEMP/dmg-staging"
+        app_hidden=" .app"
+        apps_link=" "
+
+        rm -rf "$staging"
+        mkdir -p "$staging"
+
+        cp -R "build/Export/$APP_NAME" "$staging/$app_hidden"
+        ln -s /Applications "$staging/$apps_link"
+
+        create-dmg \
+          --volname "$vol_name" \
+          --background "Resources/background@2x.png" \
+          --window-size 582 300 \
+          --icon-size 100 \
+          --hide-extension "$app_hidden" \
+          --icon "$app_hidden" 150 150 \
+          --icon "$apps_link" 436 150 \
+          "build/$DMG_NAME" \
+          "$staging"
+
         codesign --sign "Developer ID Application" \
           --timestamp \
           --team-id "$APPLE_TEAM_ID" \
