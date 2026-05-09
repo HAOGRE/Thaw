@@ -39,13 +39,6 @@ jobs:
           dmg-name: ${{ env.DMG_NAME }}
           app-name: ${{ env.APP_NAME }}
 
-      - name: Upload App for local testing
-        uses: actions/upload-artifact@v7
-        with:
-          name: Thaw-app
-          path: build/Export/${{ env.APP_NAME }}
-          retention-days: 3
-
       - name: Upload DMG
         uses: actions/upload-artifact@v7
         with:
