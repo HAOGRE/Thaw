@@ -9,7 +9,6 @@ A brief description of the changes proposed in this pull request.
 - [ ] Code style update (formatting, renaming)
 - [ ] Documentation
 - [ ] Feature
-- [ ] i18n/l10n (Translation/Localization)
 - [ ] Refactor
 - [ ] Performance improvement
 - [ ] Test addition or update
@@ -38,7 +37,6 @@ What does this PR change or add?
 - [ ] I've run relevant tests and they pass
 - [ ] I've added or updated tests (if applicable)
 - [ ] I've updated documentation as needed
-- [ ] I've verified localized strings work correctly (if i18n/l10n changes)
 
 ## Other information
 
