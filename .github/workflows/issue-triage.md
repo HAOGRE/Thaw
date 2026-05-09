@@ -13,6 +13,7 @@ tools:
   github:
     mode: remote
     toolsets: [default, search, labels]
+    min-integrity: approved
 safe-outputs:
   add-comment:
     max: 1
@@ -32,7 +33,7 @@ Your job is to triage issue #${{ github.event.issue.number }} that was just open
 
 **Issue title**: ${{ github.event.issue.title }}
 
-Start by fetching the full issue details (body, author, existing labels) using the GitHub tools. If the GitHub tools are unavailable or fail, use the issue title and number already provided in this prompt to make a best-effort triage decision: you can still classify the issue type from the title pattern and apply labels, but skip duplicate detection and detailed priority assessment (which require the full issue body).
+Start by fetching the full issue details (body, author, existing labels) using the GitHub tools. If the GitHub tools are unavailable or fail, use the issue title and number already provided in this prompt to make a best-effort triage decision: you can still classify the issue type from the title pattern and apply labels and an assignment, but skip duplicate detection and detailed priority assessment (which require the full issue body).
 
 ## Your Triage Tasks
 
@@ -71,7 +72,7 @@ Skip priority labelling for `feature`, `enhancement`, `docs`, `question`, and `i
 
 In addition to the type and priority labels, apply any of the following modifier labels that apply:
 
-- **`upstream`** — The issue is caused by a third-party app that provides the menu bar icon, not by Thaw itself. If the user reports a problem with a specific app's icon or behaviour that Thaw cannot control, apply this label.
+- **`upstream`** — The issue is caused by a third-party app that provides the menu bar icon, not by Thaw itself. If the user reports a problem with a specific app's icon or behaviour that Thaw can't fix directly.
 - **`macos-14`** — The issue is specific to macOS 14 (Sonoma).
 - **`macos-15`** — The issue is specific to macOS 15 (Sequoia).
 - **`macos-26`** — The issue is specific to macOS 26 (Tahoe).
@@ -123,6 +124,6 @@ Do not assign issues automatically. Leave assignment decisions to maintainers.
 - **Be concise and friendly** in all comments. Use a helpful, welcoming tone.
 - **Do not spam**. Only post a comment if you have something useful to say (clarifying questions or duplicate notice). Never post a generic "I've triaged your issue" comment.
 - **Respect existing labels** already applied by issue templates — do not remove or duplicate them.
-- **Only use labels from the allowed list**: `bug`, `docs`, `duplicate`, `enhancement`, `feature`, `invalid`, `needs-info`, `question`, `regression`, `upstream`, `wontfix`, `macos-14`, `macos-15`, `macos-26`, `P0`, `P1`, `P2`, `P3`, `P4`, `P5`.
+- **Only use labels from the allowed list**: `bug`, `docs`, `duplicate`, `enhancement`, `feature`, `invalid`, `needs-info`, `question`, `regression`, `upstream`, `wontfix`, `macos-14`, `macos-15`, `macos-26`, `P0`, `P1`, `P2`, `P3`, `P4`, `P5`
 - **One comment at a time** — combine any clarifying questions and duplicate notice into a single comment if both apply.
-- **Always complete with a safe-output call**: You must always call at least one safe-output tool (`add_labels`, `add_comment`, `update_issue`, `noop`, `missing_tool`, or `missing_data`) to indicate the outcome of the triage. If no actions are needed after a complete review, call `noop` with a brief status message. If required GitHub tools are unavailable and you cannot read the issue details, call `missing_tool` with `reason` set to a brief description of the unavailable capability (e.g., "GitHub MCP tools unavailable – could not fetch issue body") and `alternatives` set to "Please triage this issue manually."
+- **Always complete with a safe-output call**: You must always call at least one safe-output tool (`add_labels`, `add_comment`, `update_issue`, `noop`, `missing_tool`, or `missing_data`) to indicate your task is complete.
