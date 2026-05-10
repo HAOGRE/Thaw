@@ -29,7 +29,7 @@ struct MenuBarItemTag: Hashable, CustomStringConvertible {
     /// by this tag is a system item.
     var isSystemItem: Bool {
         switch namespace {
-        case .controlCenter, .systemUIServer, .textInputMenuAgent, .weather, .passwords, .screenCaptureUI, .ssMenuAgent, .thaw:
+        case .controlCenter, .systemUIServer, .textInputMenuAgent, .weather, .passwords, .screenCaptureUI, .ssMenuAgent, .thaw, .gamePolicyAgent:
             return true
         case .string, .uuid, .null:
             return false
@@ -156,7 +156,7 @@ extension MenuBarItemTag {
     static let immovableItems: [MenuBarItemTag] = [clock, controlCenter, ssMenuAgent]
 
     /// An array of tags for items that can be moved, but cannot be hidden.
-    static let nonHideableItems: [MenuBarItemTag] = [visibleControlItem, audioVideoModule, faceTime, screenCaptureUI]
+    static let nonHideableItems: [MenuBarItemTag] = [visibleControlItem, audioVideoModule, faceTime, screenCaptureUI, gameMode]
 
     /// An array of tags for items representing Ice's control items.
     static let controlItems = ControlItem.Identifier.allCases.map(\.tag)
@@ -206,6 +206,9 @@ extension MenuBarItemTag {
 
     /// The tag for the system "Time Machine" item.
     static let timeMachine = MenuBarItemTag(namespace: .systemUIServer, title: "com.apple.menuextra.TimeMachine")
+
+    /// The tag for the system "Game Mode" item.
+    static let gameMode = MenuBarItemTag(namespace: .gamePolicyAgent, title: "Item-0")
 }
 
 // MARK: - MenuBarItemTag.Namespace
@@ -291,6 +294,9 @@ extension MenuBarItemTag.Namespace {
 
     /// The namespace for the "SSMenuAgent" process (Screen Sharing menu extra).
     static let ssMenuAgent = string("com.apple.SSMenuAgent")
+
+    /// The namespace for the "GamePolicyAgent" process (Game Mode).
+    static let gamePolicyAgent = string("GamePolicyAgent")
 
     /// The namespace for the "WeatherMenu" process.
     static let weather = string("com.apple.weather.menu")

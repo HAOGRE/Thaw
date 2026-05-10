@@ -5540,6 +5540,7 @@ extension MenuBarItemManager {
                 .audioVideoModule,
                 .faceTime,
                 .screenCaptureUI,
+                .gameMode,
             ]
             var nonProfileFootprint: CGFloat = 0
             var nonProfileCount = 0
