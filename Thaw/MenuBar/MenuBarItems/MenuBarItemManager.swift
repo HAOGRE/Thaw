@@ -2947,7 +2947,7 @@ extension MenuBarItemManager {
         // Items placed adjacent to any other anchor are intentionally positioned;
         // recovering them to visible would undo a correct move.
         switch destination {
-        case .leftOfItem(let anchor), .rightOfItem(let anchor):
+        case let .leftOfItem(anchor), let .rightOfItem(anchor):
             guard anchor.tag == .alwaysHiddenControlItem else { return }
         }
 
