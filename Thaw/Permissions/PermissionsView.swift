@@ -228,9 +228,11 @@ struct PermissionsView: View {
 
                 if iceImportResult?.success == true {
                     // Disabled status label — no action needed.
-                    Button("Imported") {}
-                        .foregroundStyle(.green)
-                        .disabled(true)
+                    Button("Imported") {
+                        // Intentionally empty: this is a disabled status-only button after a successful import.
+                    }
+                    .foregroundStyle(.green)
+                    .disabled(true)
                 } else {
                     Button("Import Settings") {
                         importIceSettings()

@@ -145,6 +145,8 @@ extension MenuBarBackgroundKind {
 }
 
 extension MenuBarBackgroundKind {
+    /// App-level default for background rendering in appearance configs.
+    /// Named `default` for call-site readability (`.default`), escaped because `default` is a Swift keyword.
     static let `default` = MenuBarBackgroundKind.none
 }
 
