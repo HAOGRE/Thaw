@@ -216,13 +216,21 @@ final class MenuBarManager: ObservableObject {
             }
             .store(in: &c)
 
-        // Refresh average color when space or screen changes while settings or adaptive is active.
+        // Refresh average color when space or screen changes, or on wake from sleep,
+        // while settings or adaptive is active. Wake notification gets a 1s delay so
+        // the display has time to fully light up and render the wallpaper before capture.
         Publishers.Merge(
+            Publishers.Merge(
+                NSWorkspace.shared.notificationCenter
+                    .publisher(for: NSWorkspace.activeSpaceDidChangeNotification)
+                    .replace(with: ()),
+                NotificationCenter.default
+                    .publisher(for: NSApplication.didChangeScreenParametersNotification)
+                    .replace(with: ())
+            ),
             NSWorkspace.shared.notificationCenter
-                .publisher(for: NSWorkspace.activeSpaceDidChangeNotification)
-                .replace(with: ()),
-            NotificationCenter.default
-                .publisher(for: NSApplication.didChangeScreenParametersNotification)
+                .publisher(for: NSWorkspace.didWakeNotification)
+                .delay(for: .seconds(1), scheduler: DispatchQueue.main)
                 .replace(with: ())
         )
         .receive(on: DispatchQueue.main)
