@@ -248,6 +248,8 @@ private struct UnlabeledBackgroundEditor: View {
                     .labelsHidden()
                 case .glass:
                     EmptyView()
+                case .adaptive:
+                    EmptyView()
                 }
             }
             .frame(height: 24)
@@ -388,6 +390,8 @@ private struct UnlabeledShapeEditor: View {
                     )
                     .labelsHidden()
                 case .glass:
+                    EmptyView()
+                case .adaptive:
                     EmptyView()
                 }
             }

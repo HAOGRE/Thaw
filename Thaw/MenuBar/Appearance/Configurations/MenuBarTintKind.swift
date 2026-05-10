@@ -18,6 +18,8 @@ enum MenuBarTintKind: Int, CaseIterable, Identifiable {
     case gradient = 2
     /// The menu bar is tinted with a glass effect.
     case glass = 3
+    /// The menu bar is tinted with an adaptive color from the desktop wallpaper.
+    case adaptive = 4
 
     var id: Int {
         rawValue
@@ -30,6 +32,7 @@ enum MenuBarTintKind: Int, CaseIterable, Identifiable {
         case .solid: "Solid"
         case .gradient: "Gradient"
         case .glass: "Glass"
+        case .adaptive: "Adaptive"
         }
     }
 }

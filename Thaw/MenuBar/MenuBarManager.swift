@@ -45,6 +45,9 @@ final class MenuBarManager: ObservableObject {
     /// Cancellable for the periodic average-color refresh, active only while settings is visible.
     private var averageColorRefreshCancellable: AnyCancellable?
 
+    /// Cancellable for the periodic average-color refresh when adaptive background is active.
+    private var adaptiveColorRefreshCancellable: AnyCancellable?
+
     /// A Boolean value that indicates whether the application menus are hidden.
     private var isHidingApplicationMenus = false
 
@@ -213,7 +216,7 @@ final class MenuBarManager: ObservableObject {
             }
             .store(in: &c)
 
-        // Refresh average color when space or screen changes while settings visible.
+        // Refresh average color when space or screen changes while settings or adaptive is active.
         Publishers.Merge(
             NSWorkspace.shared.notificationCenter
                 .publisher(for: NSWorkspace.activeSpaceDidChangeNotification)
@@ -224,15 +227,41 @@ final class MenuBarManager: ObservableObject {
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] in
-            guard
-                let self,
-                settingsWindow?.isVisible == true
-            else {
-                return
-            }
+            guard let self else { return }
+            let isAdaptiveActive: Bool = {
+                guard let appState = self.appState else { return false }
+                let current = appState.appearanceManager.configuration.current
+                return current.backgroundKind == .adaptive || current.tintKind == .adaptive
+            }()
+            guard settingsWindow?.isVisible == true || isAdaptiveActive else { return }
             updateAverageColorInfo()
         }
         .store(in: &c)
+
+        // Start/stop adaptive color refresh when background or tint uses adaptive mode.
+        if let appState {
+            appState.appearanceManager.$configuration
+                .map { config in
+                    let current = config.current
+                    return current.backgroundKind == .adaptive || current.tintKind == .adaptive
+                }
+                .removeDuplicates()
+                .sink { [weak self] isAdaptive in
+                    guard let self else { return }
+                    if isAdaptive {
+                        captureAdaptiveColorWithRetry()
+                        adaptiveColorRefreshCancellable = Timer.publish(every: 30, tolerance: 5, on: .main, in: .default)
+                            .autoconnect()
+                            .sink { [weak self] _ in
+                                self?.updateAverageColorInfo()
+                            }
+                    } else {
+                        adaptiveColorRefreshCancellable?.cancel()
+                        adaptiveColorRefreshCancellable = nil
+                    }
+                }
+                .store(in: &c)
+        }
 
         // Hide application menus when a section is shown (if applicable).
         Publishers.MergeMany(sections.map(\.controlItem.$state))
@@ -358,18 +387,22 @@ final class MenuBarManager: ObservableObject {
         let isIceBarVisible = appState.navigationState.isIceBarPresented
         let isSearchVisible = appState.navigationState.isSearchPresented
         let anyIceBarEnabled = appState.settings.displaySettings.isIceBarEnabledOnAnyDisplay
+        let currentConfig = appState.appearanceManager.configuration.current
+        let isAdaptiveActive = currentConfig.backgroundKind == .adaptive || currentConfig.tintKind == .adaptive
 
-        guard isSettingsVisible || isIceBarVisible || isSearchVisible || anyIceBarEnabled else {
+        guard isSettingsVisible || isIceBarVisible || isSearchVisible || anyIceBarEnabled || isAdaptiveActive else {
             return
         }
 
-        guard
-            let settingsWindow,
-            settingsWindow.isVisible,
-            let screen = settingsWindow.screen
-        else {
-            return
+        let screen: NSScreen? = if isSettingsVisible {
+            settingsWindow?.screen
+        } else if isAdaptiveActive {
+            NSScreen.screenWithActiveMenuBar
+        } else {
+            nil
         }
+
+        guard let screen else { return }
 
         let windows = WindowInfo.createWindows(option: .onScreen)
         let displayID = screen.displayID
@@ -397,6 +430,27 @@ final class MenuBarManager: ObservableObject {
         if averageColorInfo != info {
             averageColorInfo = info
         }
+    }
+
+    /// Attempts to capture the adaptive color with retries when the initial
+    /// capture fails (e.g. during early app launch before the Window Server
+    /// is fully settled).
+    private func captureAdaptiveColorWithRetry() {
+        updateAverageColorInfo()
+        guard averageColorInfo == nil else { return }
+        var retries = 0
+        func scheduleRetry() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                guard let self else { return }
+                retries += 1
+                guard retries < 10 else { return }
+                updateAverageColorInfo()
+                if averageColorInfo == nil {
+                    scheduleRetry()
+                }
+            }
+        }
+        scheduleRetry()
     }
 
     /// Returns a Boolean value that indicates whether the given display

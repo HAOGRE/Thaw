@@ -131,6 +131,8 @@ enum MenuBarBackgroundKind: Int, CaseIterable, Codable, Hashable {
     case gradient = 2
     /// A glass-material background.
     case glass = 3
+    /// An adaptive background that uses the average color of the desktop wallpaper.
+    case adaptive = 4
 }
 
 extension MenuBarBackgroundKind {
@@ -140,6 +142,7 @@ extension MenuBarBackgroundKind {
         case .solid: "Solid"
         case .gradient: "Gradient"
         case .glass: "Glass"
+        case .adaptive: "Adaptive"
         }
     }
 }

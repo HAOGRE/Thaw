@@ -543,6 +543,8 @@ private final class MenuBarOverlayPanelContentView: NSView {
     @Published private var previewConfiguration:
         MenuBarAppearancePartialConfiguration?
 
+    @Published private var averageColorInfo: MenuBarAverageColorInfo?
+
     private var cancellables = Set<AnyCancellable>()
 
     private lazy var tintGlassView: NSGlassEffectView = {
@@ -637,6 +639,10 @@ private final class MenuBarOverlayPanelContentView: NSView {
                     .removeDuplicates()
                     .assign(to: &$previewConfiguration)
 
+                appState.menuBarManager.$averageColorInfo
+                    .removeDuplicates()
+                    .assign(to: &$averageColorInfo)
+
                 // Fade out whenever a menu bar item is being dragged.
                 appState.$isDraggingMenuBarItem
                     .removeDuplicates()
@@ -686,9 +692,10 @@ private final class MenuBarOverlayPanelContentView: NSView {
                 .store(in: &c)
         }
 
-        // Redraw whenever the configurations change.
+        // Redraw whenever the configurations or average color change.
         $fullConfiguration.replace(with: ())
             .merge(with: $previewConfiguration.replace(with: ()))
+            .merge(with: $averageColorInfo.replace(with: ()))
             .sink { [weak self] _ in
                 self?.updateBackgroundGlass()
                 self?.needsDisplay = true
@@ -1117,6 +1124,14 @@ private final class MenuBarOverlayPanelContentView: NSView {
             {
                 tintGradient.draw(in: rect, angle: 0)
             }
+        case .adaptive:
+            if let colorInfo = averageColorInfo,
+               let color = NSColor(cgColor: colorInfo.color)?
+               .withAlphaComponent(configuration.tintOpacity)
+            {
+                color.setFill()
+                rect.fill()
+            }
         }
     }
 
@@ -1230,6 +1245,14 @@ private final class MenuBarOverlayPanelContentView: NSView {
             }
         case .glass:
             break
+        case .adaptive:
+            if let colorInfo = averageColorInfo,
+               let color = NSColor(cgColor: colorInfo.color)?
+               .withAlphaComponent(configuration.backgroundOpacity)
+            {
+                color.setFill()
+                rect.fill()
+            }
         }
     }
 
