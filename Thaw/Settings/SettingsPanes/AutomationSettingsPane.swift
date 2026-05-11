@@ -173,7 +173,7 @@ struct AutomationSettingsPane: View {
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 8) {
-                TextField("Bundle Identifier (e.g., com.droppy)", text: $newBundleId)
+                TextField("Bundle Identifier (e.g., iordv.Droppy)", text: $newBundleId)
                     .textFieldStyle(.roundedBorder)
 
                 Button("Add") {
