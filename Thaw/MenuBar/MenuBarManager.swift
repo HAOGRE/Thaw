@@ -216,21 +216,13 @@ final class MenuBarManager: ObservableObject {
             }
             .store(in: &c)
 
-        // Refresh average color when space or screen changes, or on wake from sleep,
-        // while settings or adaptive is active. Wake notification gets a 1s delay so
-        // the display has time to fully light up and render the wallpaper before capture.
+        // Refresh average color when space or screen changes while settings or adaptive is active.
         Publishers.Merge(
-            Publishers.Merge(
-                NSWorkspace.shared.notificationCenter
-                    .publisher(for: NSWorkspace.activeSpaceDidChangeNotification)
-                    .replace(with: ()),
-                NotificationCenter.default
-                    .publisher(for: NSApplication.didChangeScreenParametersNotification)
-                    .replace(with: ())
-            ),
             NSWorkspace.shared.notificationCenter
-                .publisher(for: NSWorkspace.didWakeNotification)
-                .delay(for: .seconds(1), scheduler: DispatchQueue.main)
+                .publisher(for: NSWorkspace.activeSpaceDidChangeNotification)
+                .replace(with: ()),
+            NotificationCenter.default
+                .publisher(for: NSApplication.didChangeScreenParametersNotification)
                 .replace(with: ())
         )
         .receive(on: DispatchQueue.main)
@@ -245,6 +237,28 @@ final class MenuBarManager: ObservableObject {
             updateAverageColorInfo()
         }
         .store(in: &c)
+
+        // On wake from sleep, fire multiple delayed captures so the bar recovers
+        // even if the display or wallpaper isn't fully rendered yet. Each capture
+        // overrides the previous, so the bar transitions smoothly from nil/white
+        // to the correct color as displays settle (external monitors take longer).
+        NSWorkspace.shared.notificationCenter
+            .publisher(for: NSWorkspace.didWakeNotification)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                let isAdaptiveActive: Bool = {
+                    guard let appState = self.appState else { return false }
+                    let current = appState.appearanceManager.configuration.current
+                    return current.backgroundKind == .adaptive || current.tintKind == .adaptive
+                }()
+                guard isAdaptiveActive else { return }
+                for delay in [0.5, 2.0, 5.0, 10.0] {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                        self?.updateAverageColorInfo()
+                    }
+                }
+            }
+            .store(in: &c)
 
         // Start/stop adaptive color refresh when background or tint uses adaptive mode.
         if let appState {
