@@ -90,7 +90,10 @@ final class ProfileManager: ObservableObject {
             .debounce(for: .seconds(1.5), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                Task { await self.checkDisplayAndAutoSwitch() }
+                Task { [weak self] in
+                    guard let self else { return }
+                    await self.checkDisplayAndAutoSwitch()
+                }
             }
             .store(in: &cancellables)
 
@@ -100,7 +103,10 @@ final class ProfileManager: ObservableObject {
             .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                Task { await self.applyFocusFilterProfile() }
+                Task { [weak self] in
+                    guard let self else { return }
+                    await self.applyFocusFilterProfile()
+                }
             }
             .store(in: &cancellables)
 
@@ -110,7 +116,10 @@ final class ProfileManager: ObservableObject {
             .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                Task { await self.handleFocusFilterDeactivated() }
+                Task { [weak self] in
+                    guard let self else { return }
+                    await self.handleFocusFilterDeactivated()
+                }
             }
             .store(in: &cancellables)
 

@@ -169,6 +169,14 @@ final class MenuBarItemManager: ObservableObject {
     private var knownItemIdentifiers = Set<String>()
     /// Suppresses the next automatic relocation of newly seen leftmost items.
     private var suppressNextNewLeftmostItemRelocation = false
+
+    deinit {
+        rehideTimer?.invalidate()
+        rehideCancellable?.cancel()
+        cacheTickCancellable?.cancel()
+        menuOpenCheckTask?.cancel()
+    }
+
     /// Continuation to signal when background cache task completes.
     private var backgroundCacheContinuation: CheckedContinuation<Void, Never>?
     /// Suppresses image cache updates during layout reset to prevent stale cache during moves.
@@ -3557,7 +3565,10 @@ extension MenuBarItemManager {
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                Task { await self.rehideTemporarilyShownItems() }
+                Task { [weak self] in
+                    guard let self else { return }
+                    await self.rehideTemporarilyShownItems()
+                }
             }
     }
 
