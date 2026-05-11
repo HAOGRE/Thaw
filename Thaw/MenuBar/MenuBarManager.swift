@@ -51,6 +51,9 @@ final class MenuBarManager: ObservableObject {
     /// Cancellable for the periodic average-color refresh when adaptive background is active.
     private var adaptiveColorRefreshCancellable: AnyCancellable?
 
+    /// Per-screen colors cached before sleep, restored on wake to avoid stale/white flash.
+    private var sleepColorCache: [CGDirectDisplayID: MenuBarAverageColorInfo]?
+
     /// A Boolean value that indicates whether the application menus are hidden.
     private var isHidingApplicationMenus = false
 
@@ -241,12 +244,22 @@ final class MenuBarManager: ObservableObject {
         }
         .store(in: &c)
 
-        // On wake from sleep, fire multiple delayed captures so the bar recovers
-        // even if the display or wallpaper isn't fully rendered yet. Each capture
-        // overrides the previous, so the bar transitions smoothly from nil/white
-        // to the correct color as displays settle (external monitors take longer).
+        // Cache per-screen colors before display sleep so they can be restored
+        // on wake, preventing a white flash before the display settles and
+        // wallpaper renders. Uses screensDidSleep/Wake which fire on display
+        // sleep/wake (screen lock, idle timeout) AND system sleep (lid close).
         NSWorkspace.shared.notificationCenter
-            .publisher(for: NSWorkspace.didWakeNotification)
+            .publisher(for: NSWorkspace.screensDidSleepNotification)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                sleepColorCache = averageColors
+            }
+            .store(in: &c)
+
+        // On display wake, restore pre-sleep colors immediately (no white flash),
+        // then schedule a single delayed capture once the display has settled.
+        NSWorkspace.shared.notificationCenter
+            .publisher(for: NSWorkspace.screensDidWakeNotification)
             .sink { [weak self] _ in
                 guard let self else { return }
                 let isAdaptiveActive: Bool = {
@@ -255,10 +268,22 @@ final class MenuBarManager: ObservableObject {
                     return current.backgroundKind == .adaptive || current.tintKind == .adaptive
                 }()
                 guard isAdaptiveActive else { return }
-                for delay in [0.5, 2.0, 5.0, 10.0] {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                        self?.updateAverageColorInfo()
+
+                // Restore pre-sleep colors so the bar never flashes white.
+                if let cache = sleepColorCache {
+                    averageColors = cache
+                    if let id = NSScreen.screenWithActiveMenuBar?.displayID,
+                       let cached = cache[id]
+                    {
+                        averageColorInfo = cached
                     }
+                }
+
+                // Wait 8s for the display to fully wake and render wallpaper,
+                // then capture fresh colors that replace the cached ones.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 8) { [weak self] in
+                    self?.updateAverageColorInfo()
+                    self?.sleepColorCache = nil
                 }
             }
             .store(in: &c)
