@@ -637,10 +637,6 @@ final class HIDEventManager: ObservableObject {
         disarmShowOnClickGuard()
         dismissMenuBarTooltip()
     }
-
-    deinit {
-        healthCheckTimer?.invalidate()
-    }
 }
 
 // MARK: - Handler Methods
