@@ -8,7 +8,6 @@
 
 import Combine
 import CoreGraphics
-import Darwin.Mach
 import SwiftUI
 
 /// The model for app-wide state.
@@ -65,9 +64,6 @@ final class AppState: ObservableObject {
     /// Track open windows to prevent duplicates
     private var openWindows = Set<IceWindowIdentifier>()
 
-    /// The background task for periodic memory monitoring.
-    private var memoryMonitoringTask: Task<Void, Never>?
-
     /// Track last known screen count to detect disconnects.
     private var lastKnownScreenCount = NSScreen.screens.count
 
@@ -114,54 +110,12 @@ final class AppState: ObservableObject {
         profileManager.performSetup(with: self)
 
         configureCancellables()
-
-        // Start memory monitoring
-        startMemoryMonitoring()
         diagLog.debug("setupTask: AppState setup sequence complete")
     }
 
     /// Allows explicit starting of the updater from UI flows.
     func startUpdaterIfNeeded() {
         updatesManager.startUpdaterIfNeeded()
-    }
-
-    /// Starts periodic memory monitoring to track all memory usage.
-    private func startMemoryMonitoring() {
-        memoryMonitoringTask?.cancel()
-        memoryMonitoringTask = Task {
-            let formatter = ISO8601DateFormatter()
-            do {
-                while true {
-                    let memoryUsage = getMemoryInfo()
-                    let timestamp = formatter.string(from: Date())
-
-                    // Always log memory usage, not just high usage
-                    diagLog.info("Memory usage at \(timestamp): \(memoryUsage / 1024 / 1024)MB")
-
-                    // Log warnings for specific conditions
-                    let memoryWarningThreshold: Int64 = 500 * 1024 * 1024 // 500MB
-                    if memoryUsage > memoryWarningThreshold {
-                        diagLog.warning("High memory usage detected: \(memoryUsage / 1024 / 1024)MB")
-                    }
-
-                    // Log component sizes for debugging — no MainActor.run needed
-                    // as AppState is already @MainActor isolated.
-                    let imageCount = imageCache.images.count
-                    let windowCount = openWindows.count
-
-                    if imageCount > 20 {
-                        diagLog.warning("Large image cache: \(imageCount) items")
-                    }
-                    if windowCount > 5 {
-                        diagLog.warning("Many open windows: \(windowCount)")
-                    }
-
-                    try await Task.sleep(for: .seconds(300))
-                }
-            } catch {
-                // CancellationError — task was cancelled, exit cleanly.
-            }
-        }
     }
 
     func dismissWindow(_ id: IceWindowIdentifier) {
@@ -171,21 +125,6 @@ final class AppState: ObservableObject {
             self.diagLog.debug("Dismissing window with id: \(id)")
             EnvironmentValues().dismissWindow(id: id)
         }
-    }
-
-    /// Gets the memory footprint of the task.
-    private func getMemoryInfo() -> Int64 {
-        var info = task_vm_info_data_t()
-        var count = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size) / UInt32(MemoryLayout<integer_t>.size)
-        let kerr: kern_return_t = withUnsafeMutablePointer(to: &info) {
-            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
-                task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), $0, &count)
-            }
-        }
-        guard kerr == KERN_SUCCESS else {
-            return 0
-        }
-        return Int64(info.phys_footprint)
     }
 
     /// Performs app state setup.
