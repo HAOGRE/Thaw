@@ -54,6 +54,13 @@ final class MenuBarManager: ObservableObject {
     /// Per-screen colors cached before sleep, restored on wake to avoid stale/white flash.
     private var sleepColorCache: [CGDirectDisplayID: MenuBarAverageColorInfo]?
 
+    /// Polling state for adaptive wake stabilization.
+    private var wakePollTimer: AnyCancellable?
+    private var wakePollPrevColors: [CGDirectDisplayID: MenuBarAverageColorInfo]?
+    private var wakePollStableCount = 0
+    private var wakePollDidChange = false
+    private var wakePollStartTime: Date?
+
     /// A Boolean value that indicates whether the application menus are hidden.
     private var isHidingApplicationMenus = false
 
@@ -257,7 +264,8 @@ final class MenuBarManager: ObservableObject {
             .store(in: &c)
 
         // On display wake, restore pre-sleep colors immediately (no white flash),
-        // then schedule a single delayed capture once the display has settled.
+        // then poll every 1s until the captured color changes from the cached
+        // value and stabilizes (2 consecutive identical captures), or 10s max.
         NSWorkspace.shared.notificationCenter
             .publisher(for: NSWorkspace.screensDidWakeNotification)
             .sink { [weak self] _ in
@@ -269,22 +277,59 @@ final class MenuBarManager: ObservableObject {
                 }()
                 guard isAdaptiveActive else { return }
 
-                // Restore pre-sleep colors so the bar never flashes white.
-                if let cache = sleepColorCache {
-                    averageColors = cache
-                    if let id = NSScreen.screenWithActiveMenuBar?.displayID,
-                       let cached = cache[id]
-                    {
-                        averageColorInfo = cached
-                    }
+                guard let cache = sleepColorCache else {
+                    updateAverageColorInfo()
+                    return
                 }
 
-                // Wait 8s for the display to fully wake and render wallpaper,
-                // then capture fresh colors that replace the cached ones.
-                DispatchQueue.main.asyncAfter(deadline: .now() + 8) { [weak self] in
-                    self?.updateAverageColorInfo()
-                    self?.sleepColorCache = nil
+                // Restore pre-sleep colors so the bar never flashes white.
+                averageColors = cache
+                if let id = NSScreen.screenWithActiveMenuBar?.displayID,
+                   let cached = cache[id]
+                {
+                    averageColorInfo = cached
                 }
+
+                // Poll every 1s until color changes from cache then stabilizes.
+                wakePollPrevColors = nil
+                wakePollStableCount = 0
+                wakePollDidChange = false
+                wakePollStartTime = Date()
+                wakePollTimer = Timer.publish(every: 1, on: .main, in: .default)
+                    .autoconnect()
+                    .sink { [weak self] _ in
+                        guard let self else { return }
+                        let elapsed = wakePollStartTime.map { Date().timeIntervalSince($0) } ?? 0
+
+                        if elapsed >= 10 {
+                            sleepColorCache = nil
+                            wakePollTimer = nil
+                            return
+                        }
+
+                        let before = averageColors
+                        updateAverageColorInfo()
+                        let after = averageColors
+
+                        if !wakePollDidChange, let cache = sleepColorCache, after != cache {
+                            wakePollDidChange = true
+                        }
+
+                        if wakePollDidChange {
+                            if let prev = wakePollPrevColors, prev == after {
+                                wakePollStableCount += 1
+                                if wakePollStableCount >= 1 {
+                                    sleepColorCache = nil
+                                    wakePollTimer = nil
+                                    return
+                                }
+                            } else {
+                                wakePollStableCount = 0
+                            }
+                        }
+
+                        wakePollPrevColors = after
+                    }
             }
             .store(in: &c)
 
