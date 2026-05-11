@@ -7,7 +7,7 @@
 //  Licensed under the GNU GPLv3
 
 import Cocoa
-import Combine
+@preconcurrency import Combine
 @preconcurrency import CoreGraphics
 import os.lock
 
@@ -137,8 +137,8 @@ final class MenuBarItemManager: ObservableObject {
     private var temporarilyShownItemContexts = [TemporarilyShownItemContext]()
 
     /// A timer for rehiding temporarily shown menu bar items.
-    private var rehideTimer: Timer?
-    private var rehideCancellable: AnyCancellable?
+    private nonisolated(unsafe) var rehideTimer: Timer?
+    private nonisolated(unsafe) var rehideCancellable: AnyCancellable?
 
     /// Timestamp of the most recent menu bar item move operation.
     private var lastMoveOperationTimestamp: ContinuousClock.Instant?
@@ -163,7 +163,7 @@ final class MenuBarItemManager: ObservableObject {
     private var menuOpenCheckCachedAt: ContinuousClock.Instant?
 
     /// Timer for lightweight periodic cache checks.
-    private var cacheTickCancellable: AnyCancellable?
+    private nonisolated(unsafe) var cacheTickCancellable: AnyCancellable?
 
     /// Persisted identifiers of menu bar items we've already seen.
     private var knownItemIdentifiers = Set<String>()

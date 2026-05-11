@@ -8,7 +8,7 @@
 
 @preconcurrency import AXSwift
 import Cocoa
-import Combine
+@preconcurrency import Combine
 import os
 
 /// Manager that monitors input events and implements the features
@@ -37,7 +37,7 @@ final class HIDEventManager: ObservableObject {
 
     /// Timer that periodically checks whether the event tap is still
     /// valid and attempts to recreate it if the Mach port was invalidated.
-    private var healthCheckTimer: Timer?
+    private nonisolated(unsafe) var healthCheckTimer: Timer?
 
     /// The currently pending show-on-hover delay task.
     private var hoverTask: Task<Void, any Error>?

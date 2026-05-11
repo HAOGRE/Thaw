@@ -307,7 +307,6 @@ final class MenuBarManager: ObservableObject {
                             return
                         }
 
-                        let before = averageColors
                         updateAverageColorInfo()
                         let after = averageColors
 
