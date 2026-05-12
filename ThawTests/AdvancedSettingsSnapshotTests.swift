@@ -34,6 +34,7 @@ final class AdvancedSettingsSnapshotTests: XCTestCase {
             sectionDividerStyle: 0,
             hideApplicationMenus: false,
             enableSecondaryContextMenu: true,
+            enableSecondaryContextMenuQuit: false,
             showOnHoverDelay: 0.2,
             tooltipDelay: 1.0,
             showMenuBarTooltips: true,
@@ -50,6 +51,7 @@ final class AdvancedSettingsSnapshotTests: XCTestCase {
             sectionDividerStyle: 1,
             hideApplicationMenus: true,
             enableSecondaryContextMenu: false,
+            enableSecondaryContextMenuQuit: true,
             showOnHoverDelay: 0.5,
             tooltipDelay: 2.0,
             showMenuBarTooltips: false,
@@ -131,6 +133,60 @@ final class AdvancedSettingsSnapshotTests: XCTestCase {
         XCTAssertEqual(decoded.iconRefreshInterval, 5.0)
         XCTAssertEqual(decoded.enableDiagnosticLogging, true)
         XCTAssertEqual(decoded.useDoubleClickToShowAlwaysHiddenSection, true)
+    }
+
+    // MARK: - Forward-Compatibility Tests
+
+    func testDecodeOlderProfileMissingNewerKeys() throws {
+        // Simulates a profile saved before useDoubleClickToShowAlwaysHiddenSection
+        // and enableSecondaryContextMenuQuit were added. Decoding must succeed,
+        // filling in defaults from Defaults.DefaultValue.
+        let json = """
+        {
+            "enableAlwaysHiddenSection": true,
+            "showAllSectionsOnUserDrag": false,
+            "sectionDividerStyle": 0,
+            "hideApplicationMenus": true,
+            "enableSecondaryContextMenu": true,
+            "showOnHoverDelay": 0.2,
+            "tooltipDelay": 1.0,
+            "showMenuBarTooltips": false,
+            "iconRefreshInterval": 3.0,
+            "enableDiagnosticLogging": false
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try decoder.decode(AdvancedSettingsSnapshot.self, from: json)
+
+        XCTAssertTrue(decoded.enableAlwaysHiddenSection)
+        XCTAssertEqual(
+            decoded.useDoubleClickToShowAlwaysHiddenSection,
+            Defaults.DefaultValue.useDoubleClickToShowAlwaysHiddenSection
+        )
+        XCTAssertEqual(
+            decoded.enableSecondaryContextMenuQuit,
+            Defaults.DefaultValue.enableSecondaryContextMenuQuit
+        )
+    }
+
+    func testDecodeEmptyObjectFallsBackToDefaults() throws {
+        // Worst-case forward-compat: every key is missing, decoder must still
+        // produce a snapshot rather than throwing keyNotFound.
+        let json = "{}".data(using: .utf8)!
+        let decoded = try decoder.decode(AdvancedSettingsSnapshot.self, from: json)
+
+        XCTAssertEqual(
+            decoded.enableAlwaysHiddenSection,
+            Defaults.DefaultValue.enableAlwaysHiddenSection
+        )
+        XCTAssertEqual(
+            decoded.sectionDividerStyle,
+            Defaults.DefaultValue.sectionDividerStyle.rawValue
+        )
+        XCTAssertEqual(
+            decoded.enableSecondaryContextMenuQuit,
+            Defaults.DefaultValue.enableSecondaryContextMenuQuit
+        )
     }
 
     // MARK: - SectionDividerStyle Tests
@@ -232,6 +288,7 @@ final class AdvancedSettingsSnapshotTests: XCTestCase {
             sectionDividerStyle: 0,
             hideApplicationMenus: false,
             enableSecondaryContextMenu: false,
+            enableSecondaryContextMenuQuit: false,
             showOnHoverDelay: 0,
             tooltipDelay: 0,
             showMenuBarTooltips: false,
@@ -247,6 +304,7 @@ final class AdvancedSettingsSnapshotTests: XCTestCase {
         XCTAssertFalse(decoded.showAllSectionsOnUserDrag)
         XCTAssertFalse(decoded.hideApplicationMenus)
         XCTAssertFalse(decoded.enableSecondaryContextMenu)
+        XCTAssertFalse(decoded.enableSecondaryContextMenuQuit)
         XCTAssertFalse(decoded.showMenuBarTooltips)
         XCTAssertFalse(decoded.enableDiagnosticLogging)
         XCTAssertFalse(decoded.useDoubleClickToShowAlwaysHiddenSection)
@@ -259,6 +317,7 @@ final class AdvancedSettingsSnapshotTests: XCTestCase {
             sectionDividerStyle: 0,
             hideApplicationMenus: true,
             enableSecondaryContextMenu: true,
+            enableSecondaryContextMenuQuit: true,
             showOnHoverDelay: 0,
             tooltipDelay: 0,
             showMenuBarTooltips: true,
@@ -274,6 +333,7 @@ final class AdvancedSettingsSnapshotTests: XCTestCase {
         XCTAssertTrue(decoded.showAllSectionsOnUserDrag)
         XCTAssertTrue(decoded.hideApplicationMenus)
         XCTAssertTrue(decoded.enableSecondaryContextMenu)
+        XCTAssertTrue(decoded.enableSecondaryContextMenuQuit)
         XCTAssertTrue(decoded.showMenuBarTooltips)
         XCTAssertTrue(decoded.enableDiagnosticLogging)
         XCTAssertTrue(decoded.useDoubleClickToShowAlwaysHiddenSection)

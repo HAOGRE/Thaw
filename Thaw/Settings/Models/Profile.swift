@@ -94,6 +94,7 @@ struct AdvancedSettingsSnapshot: Codable {
     var sectionDividerStyle: Int
     var hideApplicationMenus: Bool
     var enableSecondaryContextMenu: Bool
+    var enableSecondaryContextMenuQuit: Bool
     var showOnHoverDelay: TimeInterval
     var tooltipDelay: TimeInterval
     var showMenuBarTooltips: Bool
@@ -109,6 +110,7 @@ struct AdvancedSettingsSnapshot: Codable {
             sectionDividerStyle: settings.sectionDividerStyle.rawValue,
             hideApplicationMenus: settings.hideApplicationMenus,
             enableSecondaryContextMenu: settings.enableSecondaryContextMenu,
+            enableSecondaryContextMenuQuit: settings.enableSecondaryContextMenuQuit,
             showOnHoverDelay: settings.showOnHoverDelay,
             tooltipDelay: settings.tooltipDelay,
             showMenuBarTooltips: settings.showMenuBarTooltips,
@@ -127,12 +129,96 @@ struct AdvancedSettingsSnapshot: Codable {
         }
         settings.hideApplicationMenus = hideApplicationMenus
         settings.enableSecondaryContextMenu = enableSecondaryContextMenu
+        settings.enableSecondaryContextMenuQuit = enableSecondaryContextMenuQuit
         settings.showOnHoverDelay = showOnHoverDelay
         settings.tooltipDelay = tooltipDelay
         settings.showMenuBarTooltips = showMenuBarTooltips
         settings.iconRefreshInterval = iconRefreshInterval
         settings.enableDiagnosticLogging = enableDiagnosticLogging
         settings.useDoubleClickToShowAlwaysHiddenSection = useDoubleClickToShowAlwaysHiddenSection
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case enableAlwaysHiddenSection
+        case showAllSectionsOnUserDrag
+        case sectionDividerStyle
+        case hideApplicationMenus
+        case enableSecondaryContextMenu
+        case enableSecondaryContextMenuQuit
+        case showOnHoverDelay
+        case tooltipDelay
+        case showMenuBarTooltips
+        case iconRefreshInterval
+        case enableDiagnosticLogging
+        case useDoubleClickToShowAlwaysHiddenSection
+    }
+
+    init(
+        enableAlwaysHiddenSection: Bool,
+        showAllSectionsOnUserDrag: Bool,
+        sectionDividerStyle: Int,
+        hideApplicationMenus: Bool,
+        enableSecondaryContextMenu: Bool,
+        enableSecondaryContextMenuQuit: Bool,
+        showOnHoverDelay: TimeInterval,
+        tooltipDelay: TimeInterval,
+        showMenuBarTooltips: Bool,
+        iconRefreshInterval: TimeInterval,
+        enableDiagnosticLogging: Bool,
+        useDoubleClickToShowAlwaysHiddenSection: Bool
+    ) {
+        self.enableAlwaysHiddenSection = enableAlwaysHiddenSection
+        self.showAllSectionsOnUserDrag = showAllSectionsOnUserDrag
+        self.sectionDividerStyle = sectionDividerStyle
+        self.hideApplicationMenus = hideApplicationMenus
+        self.enableSecondaryContextMenu = enableSecondaryContextMenu
+        self.enableSecondaryContextMenuQuit = enableSecondaryContextMenuQuit
+        self.showOnHoverDelay = showOnHoverDelay
+        self.tooltipDelay = tooltipDelay
+        self.showMenuBarTooltips = showMenuBarTooltips
+        self.iconRefreshInterval = iconRefreshInterval
+        self.enableDiagnosticLogging = enableDiagnosticLogging
+        self.useDoubleClickToShowAlwaysHiddenSection = useDoubleClickToShowAlwaysHiddenSection
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        enableAlwaysHiddenSection = try container.decodeIfPresent(
+            Bool.self, forKey: .enableAlwaysHiddenSection
+        ) ?? Defaults.DefaultValue.enableAlwaysHiddenSection
+        showAllSectionsOnUserDrag = try container.decodeIfPresent(
+            Bool.self, forKey: .showAllSectionsOnUserDrag
+        ) ?? Defaults.DefaultValue.showAllSectionsOnUserDrag
+        sectionDividerStyle = try container.decodeIfPresent(
+            Int.self, forKey: .sectionDividerStyle
+        ) ?? Defaults.DefaultValue.sectionDividerStyle.rawValue
+        hideApplicationMenus = try container.decodeIfPresent(
+            Bool.self, forKey: .hideApplicationMenus
+        ) ?? Defaults.DefaultValue.hideApplicationMenus
+        enableSecondaryContextMenu = try container.decodeIfPresent(
+            Bool.self, forKey: .enableSecondaryContextMenu
+        ) ?? Defaults.DefaultValue.enableSecondaryContextMenu
+        enableSecondaryContextMenuQuit = try container.decodeIfPresent(
+            Bool.self, forKey: .enableSecondaryContextMenuQuit
+        ) ?? Defaults.DefaultValue.enableSecondaryContextMenuQuit
+        showOnHoverDelay = try container.decodeIfPresent(
+            TimeInterval.self, forKey: .showOnHoverDelay
+        ) ?? Defaults.DefaultValue.showOnHoverDelay
+        tooltipDelay = try container.decodeIfPresent(
+            TimeInterval.self, forKey: .tooltipDelay
+        ) ?? Defaults.DefaultValue.tooltipDelay
+        showMenuBarTooltips = try container.decodeIfPresent(
+            Bool.self, forKey: .showMenuBarTooltips
+        ) ?? Defaults.DefaultValue.showMenuBarTooltips
+        iconRefreshInterval = try container.decodeIfPresent(
+            TimeInterval.self, forKey: .iconRefreshInterval
+        ) ?? Defaults.DefaultValue.iconRefreshInterval
+        enableDiagnosticLogging = try container.decodeIfPresent(
+            Bool.self, forKey: .enableDiagnosticLogging
+        ) ?? Defaults.DefaultValue.enableDiagnosticLogging
+        useDoubleClickToShowAlwaysHiddenSection = try container.decodeIfPresent(
+            Bool.self, forKey: .useDoubleClickToShowAlwaysHiddenSection
+        ) ?? Defaults.DefaultValue.useDoubleClickToShowAlwaysHiddenSection
     }
 }
 
@@ -281,6 +367,7 @@ struct Profile: Codable, Identifiable {
             sectionDividerStyle: Defaults.DefaultValue.sectionDividerStyle.rawValue,
             hideApplicationMenus: Defaults.DefaultValue.hideApplicationMenus,
             enableSecondaryContextMenu: Defaults.DefaultValue.enableSecondaryContextMenu,
+            enableSecondaryContextMenuQuit: Defaults.DefaultValue.enableSecondaryContextMenuQuit,
             showOnHoverDelay: Defaults.DefaultValue.showOnHoverDelay,
             tooltipDelay: Defaults.DefaultValue.tooltipDelay,
             showMenuBarTooltips: Defaults.DefaultValue.showMenuBarTooltips,

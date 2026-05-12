@@ -54,6 +54,7 @@ final class ProfileExportBundleTests: XCTestCase {
                 sectionDividerStyle: 0,
                 hideApplicationMenus: false,
                 enableSecondaryContextMenu: true,
+                enableSecondaryContextMenuQuit: false,
                 showOnHoverDelay: 0.2,
                 tooltipDelay: 1.0,
                 showMenuBarTooltips: true,
