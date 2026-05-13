@@ -354,7 +354,6 @@ struct AutomationSettingsPane: View {
         }
     }
 
-    @ViewBuilder
     private var profileHooksGroup: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -488,7 +487,7 @@ private struct HookRow: View {
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 56)
                         .multilineTextAlignment(.trailing)
-                        Stepper(value: timeoutBinding, in: 1...300) {
+                        Stepper(value: timeoutBinding, in: 1 ... 300) {
                             EmptyView()
                         }
                         .labelsHidden()
@@ -548,7 +547,7 @@ private struct HookRow: View {
             return String(localized: "File does not exist.")
         }
         let ext = (path as NSString).pathExtension.lowercased()
-        let appleScriptExts: Set<String> = ["scpt", "applescript", "scptd"]
+        let appleScriptExts: Set = ["scpt", "applescript", "scptd"]
         if !appleScriptExts.contains(ext), !fm.isExecutableFile(atPath: path) {
             return String(localized: "Not executable. Run \"chmod +x\" on the file.")
         }

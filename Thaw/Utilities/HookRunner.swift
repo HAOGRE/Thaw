@@ -38,11 +38,11 @@ enum HookRunner {
 
         var description: String {
             switch self {
-            case .fileMissing(let p): return "hook file missing: \(p)"
-            case .notExecutable(let p): return "hook file not executable (run chmod +x): \(p)"
-            case .launchFailed(let p, let e): return "hook launch failed for \(p): \(e)"
-            case .timedOut(let s): return "hook timed out after \(s)s"
-            case .nonZeroExit(let s): return "hook exited with status \(s)"
+            case let .fileMissing(p): return "hook file missing: \(p)"
+            case let .notExecutable(p): return "hook file not executable (run chmod +x): \(p)"
+            case let .launchFailed(p, e): return "hook launch failed for \(p): \(e)"
+            case let .timedOut(s): return "hook timed out after \(s)s"
+            case let .nonZeroExit(s): return "hook exited with status \(s)"
             }
         }
     }

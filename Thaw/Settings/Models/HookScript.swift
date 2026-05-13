@@ -49,7 +49,9 @@ struct ProfileAutomation: Codable, Hashable {
 
     /// True when neither hook is set. Used by the manager to elide writing
     /// an empty container into the profile JSON.
-    var isEmpty: Bool { preHook == nil && postHook == nil }
+    var isEmpty: Bool {
+        preHook == nil && postHook == nil
+    }
 }
 
 // MARK: - HookPhase / HookScope

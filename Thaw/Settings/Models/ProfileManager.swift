@@ -304,11 +304,8 @@ final class ProfileManager: ObservableObject {
             if Task.isCancelled { return }
 
             // 2. Snapshot apply: push profile settings into the running
-            //    app state. Hopping to the MainActor is a no-op here
-            //    because ProfileManager is @MainActor and the surrounding
-            //    Task inherits that isolation; the explicit await makes
-            //    the boundary readable.
-            await self?.applySnapshot(profile, to: appState)
+            //    app state.
+            self?.applySnapshot(profile, to: appState)
 
             // Run the spacing apply BEFORE the layout pass. Otherwise the
             // two race: applyOffset() kills and relaunches every menu bar
