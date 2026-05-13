@@ -482,16 +482,16 @@ private struct HookRow: View {
 
                     HStack(spacing: 4) {
                         Text("Timeout")
-                        TextField(value: timeoutBinding, format: .number) {
+                        TextField(value: timeoutBinding, formatter: timeoutFormatter) {
                             EmptyView()
                         }
                         .textFieldStyle(.roundedBorder)
-                        .frame(width: 48)
+                        .frame(width: 56)
+                        .multilineTextAlignment(.trailing)
                         Stepper(value: timeoutBinding, in: 1...300) {
                             EmptyView()
                         }
                         .labelsHidden()
-                        Text("s").foregroundStyle(.secondary)
                     }
                     .font(.caption)
 
@@ -553,6 +553,17 @@ private struct HookRow: View {
             return String(localized: "Not executable. Run \"chmod +x\" on the file.")
         }
         return nil
+    }
+
+    private var timeoutFormatter: NumberFormatter {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        let suffix = " " + String(localized: "s", comment: "Seconds unit suffix for timeout field")
+        f.positiveSuffix = suffix
+        f.negativeSuffix = suffix
+        f.minimumFractionDigits = 0
+        f.maximumFractionDigits = 0
+        return f
     }
 
     private func chooseScript() {
