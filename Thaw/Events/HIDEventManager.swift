@@ -130,6 +130,11 @@ final class HIDEventManager: ObservableObject {
     /// The pending tooltip show task.
     private var tooltipTask: Task<Void, any Error>?
 
+    /// The pending secondary-context-menu reveal task. Holding a reference lets
+    /// a subsequent click (right or left) cancel the pre-100ms-delay reveal so
+    /// the menu doesn't pop up after the user has already dismissed or moved on.
+    private var pendingSecondaryContextMenuTask: Task<Void, any Error>?
+
     /// A Boolean value that indicates whether the manager is enabled.
     private var isEnabled = false {
         didSet {
@@ -180,6 +185,10 @@ final class HIDEventManager: ObservableObject {
         } else {
             return event
         }
+        // Cancel any pending secondary-context-menu task on every mouse-down so
+        // a dismiss click or a follow-up click can't be raced by a previously
+        // scheduled reveal that hasn't yet cleared its 100ms delay.
+        pendingSecondaryContextMenuTask?.cancel()
         switch event.type {
         case .leftMouseDown:
             // Check app menu first - if click is on app menu area, don't trigger
@@ -757,6 +766,16 @@ extension HIDEventManager {
             return
         }
 
+        // Defer to third-party menu bar widgets such as notch overlay
+        // applications whose windows aren't reported in the standard menu bar
+        // items query but visually occupy menu bar space. The AX hit-test
+        // resolves the actual UI element at the cursor, so clicks that land
+        // on a widget's icon don't also trigger Thaw's show-on-click reveal.
+        if isCursorOverForeignWidgetUIElement() {
+            Self.diagLog.debug("handleShowOnClick: suppressing, cursor over foreign UI element")
+            return
+        }
+
         if isDoubleClick {
             guard appState.settings.general.showOnDoubleClick else {
                 return
@@ -1024,7 +1043,17 @@ extension HIDEventManager {
         appState: AppState,
         screen: NSScreen
     ) {
-        Task {
+        pendingSecondaryContextMenuTask = Task { [weak self] in
+            guard let self else { return }
+            // Suppress when no menu bar items are rendered on-screen for the
+            // active space. Catches phantom right-clicks landing in the menu bar
+            // y-band while a fullscreen app has auto-hidden the menu bar; the
+            // event still passes through to the underlying app so its native
+            // context menu can appear normally.
+            if !screen.isSystemMenuBarVisible() {
+                Self.diagLog.debug("handleSecondaryContextMenu: suppressing, no menu bar items on-screen for active space")
+                return
+            }
             guard
                 appState.settings.advanced.enableSecondaryContextMenu,
                 isMouseInsideEmptyMenuBarSpace(
@@ -1035,10 +1064,85 @@ extension HIDEventManager {
             else {
                 return
             }
-            // Delay prevents the menu from immediately closing.
+            // Delay prevents the menu from immediately closing and gives any
+            // foreign widget's own right-click menu a chance to render. Notch
+            // overlay applications cover wide regions of the menu bar visually
+            // but only respond to clicks on their actual icon, so probing
+            // whether a foreign menu opened in response to this click is more
+            // accurate than testing window bounds.
             try await Task.sleep(for: .milliseconds(100))
+            try Task.checkCancellation()
+            if isForeignPopUpMenuOpen() {
+                Self.diagLog.debug("handleSecondaryContextMenu: suppressing, foreign pop-up menu is open")
+                return
+            }
+            if isCursorOverForeignWidgetUIElement() {
+                Self.diagLog.debug("handleSecondaryContextMenu: suppressing, cursor over foreign UI element")
+                return
+            }
             appState.menuBarManager.showSecondaryContextMenu(at: mouseLocation)
         }
+    }
+
+    /// Returns whether the cursor sits on a UI element owned by a foreign
+    /// third-party menu bar widget such as a notch overlay application,
+    /// using the system-wide accessibility hit-test. Excludes Thaw's own
+    /// elements, the Window Server (which owns the menu bar background), and
+    /// elements with a menu-bar / menu / menu-item role (the front app's
+    /// File/Edit/View region returns the app's PID but a menu-bar-class
+    /// role). When the helper returns true, Thaw defers to the widget under
+    /// the cursor even if the widget didn't open its own pop-up menu in
+    /// response to the click.
+    private func isCursorOverForeignWidgetUIElement() -> Bool {
+        guard let mouseLocation = MouseHelpers.locationCoreGraphics else {
+            return false
+        }
+        guard let element = AXHelpers.element(at: mouseLocation) else {
+            return false
+        }
+        guard let pid = AXHelpers.pid(for: element), pid > 0 else {
+            return false
+        }
+        if pid == getpid() {
+            return false
+        }
+        let ownerName = NSRunningApplication(processIdentifier: pid)?.bundleIdentifier ?? "unknown"
+        // WindowServer / SystemUIServer own the system menu bar background; AX
+        // returning either of them indicates the cursor is over empty menu bar.
+        if ownerName == "com.apple.WindowManager" || ownerName == "com.apple.systemuiserver" {
+            return false
+        }
+        // The frontmost application owns its own menu bar background between
+        // File/Edit/View items. AX returns the app's menu bar element here
+        // even though the geometric isMouseInsideEmptyMenuBarSpace check
+        // already passed (no specific menu item is hit). Filter by role: a
+        // menu bar / menu / menu item role means the cursor is over the front
+        // app's menu bar, not over a third-party widget overlay.
+        switch AXHelpers.role(for: element) {
+        case .menuBar, .menu, .menuItem, .menuBarItem:
+            return false
+        default:
+            return true
+        }
+    }
+
+    /// Returns whether any non-Thaw window at the pop-up-menu window level is
+    /// currently on-screen. Right-click menus (NSMenu and equivalents) render
+    /// at kCGPopUpMenuWindowLevel, while persistent overlay windows from
+    /// notch overlay applications sit a level below. Filtering to the exact
+    /// pop-up level distinguishes an actually open menu from a widget's idle
+    /// overlay, which is needed to avoid showing Thaw's secondary context
+    /// menu after a click that landed on a foreign widget that opened its own
+    /// menu.
+    private func isForeignPopUpMenuOpen() -> Bool {
+        let ownPID = getpid()
+        let popUpLevel = Int(CGWindowLevelForKey(.popUpMenuWindow))
+        let windows = WindowInfo.createWindows(option: .onScreen)
+        for window in windows where window.ownerPID != ownPID {
+            guard window.layer == popUpLevel else { continue }
+            return true
+        }
+        return false
     }
 
     // MARK: Handle Application Menu Click-Through
@@ -1203,7 +1307,8 @@ extension HIDEventManager {
                 isMouseInsideEmptyMenuBarSpace(
                     appState: appState,
                     screen: screen
-                )
+                ),
+                !isCursorOverForeignWidgetUIElement()
             else {
                 if pendingHoverAction == .show {
                     hoverTask?.cancel()
@@ -1345,6 +1450,7 @@ extension HIDEventManager {
         guard
             appState.settings.general.showOnScroll,
             isMouseInsideEmptyMenuBarSpace(appState: appState, screen: screen),
+            !isCursorOverForeignWidgetUIElement(),
             let hiddenSection = appState.menuBarManager.section(
                 withName: .hidden
             )
