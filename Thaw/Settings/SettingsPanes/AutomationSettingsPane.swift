@@ -460,16 +460,17 @@ private struct HookRow: View {
                 Button("Choose Script...") { chooseScript() }
                     .buttonStyle(.bordered)
 
-                if hook != nil {
-                    Button(role: .destructive) {
-                        hook = nil
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .foregroundStyle(.red)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Clear hook")
+                Button(role: .destructive) {
+                    hook = nil
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .foregroundStyle(.red)
                 }
+                .buttonStyle(.plain)
+                .help("Clear hook")
+                .opacity(hook == nil ? 0 : 1)
+                .allowsHitTesting(hook != nil)
+                .accessibilityHidden(hook == nil)
             }
 
             if hook != nil {
