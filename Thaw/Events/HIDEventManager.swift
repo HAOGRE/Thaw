@@ -1106,10 +1106,15 @@ extension HIDEventManager {
         if pid == getpid() {
             return false
         }
-        let ownerName = NSRunningApplication(processIdentifier: pid)?.bundleIdentifier ?? "unknown"
-        // WindowServer / SystemUIServer own the system menu bar background; AX
-        // returning either of them indicates the cursor is over empty menu bar.
-        if ownerName == "com.apple.WindowManager" || ownerName == "com.apple.systemuiserver" {
+        // SystemUIServer owns part of the system menu bar; AX returning it
+        // indicates the cursor is over empty menu bar space. WindowServer also
+        // renders menu bar surfaces but is a system daemon with no bundle
+        // identifier, so NSRunningApplication can't resolve it; fall back to a
+        // process-name lookup via proc_name for that case.
+        if NSRunningApplication(processIdentifier: pid)?.bundleIdentifier == "com.apple.systemuiserver" {
+            return false
+        }
+        if isWindowServerPID(pid) {
             return false
         }
         // The frontmost application owns its own menu bar background between
@@ -1124,6 +1129,21 @@ extension HIDEventManager {
         default:
             return true
         }
+    }
+
+    /// Returns whether the given PID belongs to the macOS WindowServer
+    /// daemon. WindowServer has no bundle identifier and is not represented as
+    /// an NSRunningApplication, so the executable name has to be read via
+    /// proc_name. Used to exclude WindowServer-owned AX elements from the
+    /// foreign-widget hit-test.
+    private func isWindowServerPID(_ pid: pid_t) -> Bool {
+        var buffer = [CChar](repeating: 0, count: Int(MAXPATHLEN))
+        let length = buffer.withUnsafeMutableBufferPointer { ptr -> Int32 in
+            guard let base = ptr.baseAddress else { return -1 }
+            return proc_name(pid, base, UInt32(ptr.count))
+        }
+        guard length > 0 else { return false }
+        return String(cString: buffer) == "WindowServer"
     }
 
     /// Returns whether any non-Thaw window at the pop-up-menu window level is
