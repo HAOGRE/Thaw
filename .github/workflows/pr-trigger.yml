@@ -1,0 +1,49 @@
+name: PR Command Trigger
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  trigger-build:
+    if: github.event.issue.pull_request
+    runs-on: ubuntu-slim
+    permissions:
+      actions: write
+      issues: write
+      pull-requests: read
+
+    steps:
+      - name: Parse command
+        id: command
+        uses: github/command@v2.0.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          command: ".build"
+          permissions: write
+
+      - name: Get PR Branch
+        if: steps.command.outputs.continue == 'true'
+        id: get-branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_URL="${{ github.event.issue.pull_request.url }}"
+          PR_BRANCH=$(gh api $PR_URL --jq '.head.ref')
+          echo "branch=$PR_BRANCH" >> $GITHUB_OUTPUT
+          echo "Detected branch: $PR_BRANCH"
+
+      - name: Trigger Build DMG Workflow
+        if: steps.command.outputs.continue == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run build-dmg.yml --ref ${{ steps.get-branch.outputs.branch }} -R ${{ github.repository }}
+
+      - name: Comment on PR
+        if: steps.command.outputs.continue == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ github.event.issue.number }}"
+          gh pr comment $PR_NUMBER --body "Build triggered for branch `${{ steps.get-branch.outputs.branch }}`. Check the Actions tab for progress." -R ${{ github.repository }}
