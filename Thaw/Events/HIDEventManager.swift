@@ -1143,7 +1143,8 @@ extension HIDEventManager {
             return proc_name(pid, base, UInt32(ptr.count))
         }
         guard length > 0 else { return false }
-        return String(cString: buffer) == "WindowServer"
+        let procName = buffer.prefix { $0 != 0 }.map(UInt8.init)
+        return String(data: Data(procName), encoding: .utf8) == "WindowServer"
     }
 
     /// Returns whether any non-Thaw window at the pop-up-menu window level is
