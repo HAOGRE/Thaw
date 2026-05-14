@@ -6,7 +6,7 @@ on:
 
 jobs:
   trigger-build:
-    if: github.event.issue.pull_request
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '.build')
     runs-on: ubuntu-slim
     permissions:
       actions: write
@@ -44,21 +44,21 @@ jobs:
         if: steps.command.outputs.continue == 'true' && steps.get-branch.outputs.same_repo == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.get-branch.outputs.branch }}
         run: |
-          gh workflow run build-dmg.yml --ref ${{ steps.get-branch.outputs.branch }} -R ${{ github.repository }}
-
+          gh workflow run build-dmg.yml --ref "$BRANCH" -R "${{ github.repository }}"
       - name: Comment on PR
         if: steps.command.outputs.continue == 'true' && steps.get-branch.outputs.same_repo == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUMBER="${{ github.event.issue.number }}"
-          gh pr comment $PR_NUMBER --body "Build triggered for branch `${{ steps.get-branch.outputs.branch }}`. Check the Actions tab for progress." -R ${{ github.repository }}
+          gh pr comment "$PR_NUMBER" --body "Build triggered for branch \`${{ steps.get-branch.outputs.branch }}\`. Check the Actions tab for progress." -R "${{ github.repository }}"
 
       - name: Comment on PR for fork
-        if: steps.command.outputs.continue == 'true' && steps.get-branch.outputs.same_repo != 'true'
+        if: steps.command.outputs.continue == 'true' && steps.get-branch.outputs.same_repo == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUMBER="${{ github.event.issue.number }}"
-          gh pr comment $PR_NUMBER --body "Build was not triggered automatically because this pull request comes from a fork, and branch `${{ steps.get-branch.outputs.branch }}` does not exist in `${{ github.repository }}`." -R ${{ github.repository }}
+          gh pr comment "$PR_NUMBER" --body "Build was not triggered automatically because this pull request comes from a fork. A maintainer can trigger it manually by running the \`build-dmg\` workflow against branch \`${{ steps.get-branch.outputs.branch }}\`." -R "${{ github.repository }}"
