@@ -48,4 +48,12 @@ enum AXHelpers {
     static func role(for element: UIElement) -> Role? {
         queue.sync { try? element.role() }
     }
+
+    static func pid(for element: UIElement) -> pid_t? {
+        queue.sync {
+            var pid: pid_t = 0
+            let result = AXUIElementGetPid(element.element, &pid)
+            return result == .success ? pid : nil
+        }
+    }
 }
