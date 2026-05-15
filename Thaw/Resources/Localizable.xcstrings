@@ -9575,121 +9575,121 @@
         }
       }
     },
-    "Choose Script..." : {
+    "Choose Script…" : {
       "comment" : "A button that lets the user choose a script.",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vybrat skript..."
+            "value" : "Vybrat skript…"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wähle ein Skript aus ..."
+            "value" : "Wähle ein Skript aus …"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seleccionar script..."
+            "value" : "Seleccionar script…"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pilih Skrip..."
+            "value" : "Pilih Skrip…"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "스크립트 선택..."
+            "value" : "스크립트 선택…"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wybierz skrypt..."
+            "value" : "Wybierz skrypt…"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escolher Script..."
+            "value" : "Escolher Script…"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Choose Script..."
+            "value" : "Choose Script…"
           }
         }
       }
@@ -14341,7 +14341,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Upravit vzhled řádku nabídek..."
+            "value" : "Upravit vzhled řádku nabídek…"
           }
         },
         "de" : {
@@ -14443,7 +14443,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "编辑菜单栏外观..."
+            "value" : "编辑菜单栏外观…"
           }
         },
         "zh-Hant" : {
@@ -14508,7 +14508,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "메뉴 막대 레이아웃 수정..."
+            "value" : "메뉴 막대 레이아웃 수정…"
           }
         },
         "nl" : {
@@ -22850,7 +22850,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Menu-items worden geladen..."
+            "value" : "Menu-items worden geladen…"
           }
         },
         "pl" : {
@@ -22862,7 +22862,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carregando itens da barra de menus..."
+            "value" : "Carregando itens da barra de menus…"
           }
         },
         "ru" : {
@@ -33679,7 +33679,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoekmenu-items..."
+            "value" : "Zoekmenu-items…"
           }
         },
         "pl" : {

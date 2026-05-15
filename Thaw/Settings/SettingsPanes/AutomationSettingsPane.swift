@@ -457,7 +457,7 @@ private struct HookRow: View {
                     .truncationMode(.middle)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                Button("Choose Script...") { chooseScript() }
+                Button("Choose Script…") { chooseScript() }
                     .buttonStyle(.bordered)
 
                 Button(role: .destructive) {
