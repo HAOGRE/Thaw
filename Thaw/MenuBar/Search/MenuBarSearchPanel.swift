@@ -702,17 +702,17 @@ private struct EditNameButton: View {
                     .padding(.leading, 5)
 
                 HStack(spacing: 0) {
-                    Text("⌘")
+                    Text(verbatim: "⌘")
                 }
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
                 .foregroundStyle(.secondary)
 
-                Text("+")
+                Text(verbatim: "+")
 
                 HStack(spacing: 0) {
-                    Text("E")
+                    Text(verbatim: "E")
                 }
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
@@ -759,7 +759,7 @@ private struct EditDiscardButton: View {
                 )
                 .padding(.leading, 5)
 
-                Text("⎋")
+                Text(verbatim: "⎋")
                     .font(.system(size: 12))
                     .padding(.horizontal, 4)
                     .padding(.vertical, 2)

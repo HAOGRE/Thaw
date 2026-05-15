@@ -295,9 +295,9 @@ private struct UnlabeledBackgroundEditor: View {
                 "Border Width",
                 selection: $configuration.backgroundBorderWidth
             ) {
-                Text("1").tag(1.0)
-                Text("2").tag(2.0)
-                Text("3").tag(3.0)
+                Text(verbatim: "1").tag(1.0)
+                Text(verbatim: "2").tag(2.0)
+                Text(verbatim: "3").tag(3.0)
             }
         }
     }
@@ -450,9 +450,9 @@ private struct UnlabeledShapeEditor: View {
                 "Border Width",
                 selection: $configuration.borderWidth
             ) {
-                Text("1").tag(1.0)
-                Text("2").tag(2.0)
-                Text("3").tag(3.0)
+                Text(verbatim: "1").tag(1.0)
+                Text(verbatim: "2").tag(2.0)
+                Text(verbatim: "3").tag(3.0)
             }
         }
     }

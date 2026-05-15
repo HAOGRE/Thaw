@@ -155,7 +155,7 @@ struct PermissionsView: View {
                     VStack(alignment: .leading) {
                         ForEach(permission.details, id: \.self) { detail in
                             HStack {
-                                Text("•").bold()
+                                Text(verbatim: "•").bold()
                                 Text(detail).fontWeight(.medium)
                             }
                         }

@@ -21,7 +21,7 @@ struct ProfileEntity: AppEntity {
     var name: String
 
     var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title: "\(name)")
+        DisplayRepresentation(title: LocalizedStringResource(stringLiteral: name))
     }
 }
 

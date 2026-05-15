@@ -71,7 +71,7 @@ struct AboutSettingsPane: View {
                 }
 
                 VStack(alignment: .leading) {
-                    Text("\(Constants.displayName)")
+                    Text(verbatim: "\(Constants.displayName)")
                         .font(.system(size: 80))
                         .foregroundStyle(.primary)
 

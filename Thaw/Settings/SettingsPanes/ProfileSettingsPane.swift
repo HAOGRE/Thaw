@@ -432,7 +432,6 @@ struct ProfileSettingsPane: View {
         let hasNotch: Bool
         let isConnected: Bool
 
-        @ViewBuilder
         var localizedLabel: some View {
             HStack(spacing: 6) {
                 Text(name)

@@ -105,13 +105,13 @@ struct AutomationSettingsPane: View {
 
             Spacer().frame(width: 6)
 
-            Text("(")
+            Text(verbatim: "(")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Text(String(localized: "apps \(settings.whitelistedApps.count)", comment: "Shows the number of whitelisted apps"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text(")")
+            Text(verbatim: ")")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer()
@@ -239,22 +239,22 @@ struct AutomationSettingsPane: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .top, spacing: 8) {
-                        Text("1.")
+                        Text(verbatim: "1.")
                         Text("When an app sends a thaw:// URL to change settings, Thaw checks if that app is whitelisted.")
                     }
 
                     HStack(alignment: .top, spacing: 8) {
-                        Text("2.")
+                        Text(verbatim: "2.")
                         Text("If not whitelisted, you'll see a confirmation dialog showing the app name and what it wants to do.")
                     }
 
                     HStack(alignment: .top, spacing: 8) {
-                        Text("3.")
+                        Text(verbatim: "3.")
                         Text("If you approve, the app is permanently whitelisted and can modify settings anytime without asking again.")
                     }
 
                     HStack(alignment: .top, spacing: 8) {
-                        Text("4.")
+                        Text(verbatim: "4.")
                         Text("You can remove apps from this list at any time to revoke their access.")
                     }
                 }
@@ -403,7 +403,7 @@ struct AutomationSettingsPane: View {
     private var envVarsHelp: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Environment variables passed to scripts").font(.subheadline).foregroundStyle(.secondary)
-            Text("THAW_HOOK_PHASE, THAW_HOOK_SCOPE, THAW_PROFILE_ID, THAW_PROFILE_NAME, THAW_PREVIOUS_PROFILE_ID, THAW_PREVIOUS_PROFILE_NAME")
+            Text(verbatim: "THAW_HOOK_PHASE, THAW_HOOK_SCOPE, THAW_PROFILE_ID, THAW_PROFILE_NAME, THAW_PREVIOUS_PROFILE_ID, THAW_PREVIOUS_PROFILE_NAME")
                 .font(.caption.monospaced())
                 .foregroundStyle(.secondary)
                 .textSelection(.enabled)

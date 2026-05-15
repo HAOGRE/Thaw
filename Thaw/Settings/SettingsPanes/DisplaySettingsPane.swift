@@ -160,7 +160,7 @@ struct DisplaySettingsPane: View {
                         in: 2 ... 10,
                         step: 1
                     ) {
-                        Text("\(gridColumns.wrappedValue)")
+                        Text(verbatim: "\(gridColumns.wrappedValue)")
                     }
                 } label: {
                     Text("Columns")
