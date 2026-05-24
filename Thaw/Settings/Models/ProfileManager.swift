@@ -138,7 +138,7 @@ final class ProfileManager: ObservableObject {
             } catch {
                 diagLog.debug("No active Focus Filter on startup: \(error)")
             }
-            // No Focus Filter — fall back to display-based profile.
+            // No Focus Filter; fall back to display-based profile.
             // The spacing apply runs unconditionally; its no-op guard
             // skips the relaunch when on-disk values already match the
             // active profile's offset, but if the user is booting on a
@@ -571,25 +571,27 @@ final class ProfileManager: ObservableObject {
             forKey: .menuBarItemCustomNames
         ) as? [String: String] ?? [:]
 
+        // itemOrder must agree with savedSectionOrder; they are two
+        // representations of the same "where does each item belong?"
+        // question, and the apply pipeline assumes they are consistent.
+        // Deriving itemOrder by iterating itemCache directly produced
+        // a drift bug: closed apps preserved in savedSectionOrder
+        // (via planSectionOrder's closed-app merge) did not appear in
+        // itemOrder, and transient Control Center widgets did the
+        // opposite. On profile re-apply that drift caused
+        // closed-but-saved apps like jetbrains to be treated as
+        // unmanaged and routed through planUnmanagedPlacement instead
+        // of landing at their saved section. Delegating to
+        // MenuBarItemManager.computeSectionOrder runs the same filter
+        // and closed-app preservation, so the profile's itemOrder is
+        // a curated snapshot consistent with savedSectionOrder.
+        let itemOrder = appState.itemManager.computeSectionOrder(
+            from: appState.itemManager.itemCache
+        )
         var itemSectionMap = [String: String]()
-        var itemOrder = [String: [String]]()
-        let cache = appState.itemManager.itemCache
-        for section in MenuBarSection.Name.allCases {
-            let sectionKey = switch section {
-            case .visible: "visible"
-            case .hidden: "hidden"
-            case .alwaysHidden: "alwaysHidden"
-            }
-            var orderedIDs = [String]()
-            for item in cache.managedItems(for: section)
-                where item.canBeHidden || item.isControlItem
-            {
-                let uid = item.uniqueIdentifier
+        for (sectionKey, uids) in itemOrder {
+            for uid in uids {
                 itemSectionMap[uid] = sectionKey
-                orderedIDs.append(uid)
-            }
-            if !orderedIDs.isEmpty {
-                itemOrder[sectionKey] = orderedIDs
             }
         }
 
@@ -855,7 +857,7 @@ final class ProfileManager: ObservableObject {
     private func handleFocusFilterDeactivated() async {
         guard focusFilterActive else { return }
         focusFilterActive = false
-        diagLog.info("Focus Filter deactivated — reverting to display profile")
+        diagLog.info("Focus Filter deactivated; reverting to display profile")
         if let uuid = Bridging.getActiveMenuBarDisplayUUID() {
             await applyProfileForDisplay(uuid: uuid)
         }
