@@ -1,5 +1,5 @@
 ---
-description: "Triages new issues: labels by type and priority, identifies duplicates, and asks clarifying questions."
+description: "Triages new issues: labels by type and priority, identifies duplicates, and asks clarifying questions ONLY when required fields are missing."
 on:
   issues:
     types: [opened]
@@ -34,13 +34,30 @@ Your job is to triage issue #${{ github.event.issue.number }} that was just open
 
 **Issue title**: ${{ github.event.issue.title }}
 
-Start by fetching the full issue details (body, author, existing labels) using the GitHub tools. If the GitHub tools are unavailable or fail, use the issue title and number already provided in this prompt.
+Start by fetching the full issue details (body, author, existing labels) using the GitHub tools.
+
+## Critical rule: do NOT ask for information that is already present
+
+Before posting any comment, you MUST explicitly extract the following fields from the issue body (verbatim or clearly paraphrased) and decide whether each is present.
+
+For bug reports, the required fields are:
+
+- **Problem description**
+- **Steps to reproduce**
+- **Expected behavior**
+- **Actual behavior**
+- **Thaw app version**
+- **macOS version**
+
+Only treat a field as missing if it is truly absent or clearly marked unknown (e.g., "N/A", "unknown", blank).
+
+If all required fields are present, you MUST NOT post a clarifying-questions comment and you MUST NOT add the `needs-info` label.
 
 ## Your Triage Tasks
 
 ### 0. Support Policy Check (comment + label if unsupported)
 
-If the reporter indicates **Thaw version < 1.2.0** **and** **macOS version < 15.7.7**, then:
+If the reporter indicates **Thaw version < 1.2.0** **and** **macOS version < 15.7.7** (treat macOS 26.x and above as always supported — do not apply this check to macOS 26 users), then:
 
 1. Apply the **`unsupported`** label using `add_labels`.
 2. Post a single comment using `add_comment` explaining that those versions are no longer supported.
@@ -50,7 +67,6 @@ Example comment:
 > 👋 Hi @{author}! Thanks for the report. Note that Thaw versions below **1.2.0** and macOS versions below **15.7.7** are no longer supported. Please update Thaw and macOS (if possible) and let us know if the issue still reproduces on a supported configuration.
 
 If the issue does **not** include both versions explicitly, do **not** assume — instead, request the missing version info under **“Ask Clarifying Questions”**.
-
 
 ### 1. Identify the Issue Type
 
@@ -88,9 +104,7 @@ Skip priority labelling for `feature`, `enhancement`, `docs`, `question`, and `i
 In addition to the type and priority labels, apply any of the following modifier labels that apply:
 
 - **`upstream`** — The issue is caused by a third-party app that provides the menu bar icon, not by Thaw itself.
-- **`macos-14`** — The issue is specific to macOS 14 (Sonoma).
-- **`macos-15`** — The issue is specific to macOS 15 (Sequoia).
-- **`macos-26`** — The issue is specific to macOS 26 (Tahoe).
+- **`macos-14`**, **`macos-15`**, **`macos-26`** — Apply the macOS version label that matches the reporter’s stated macOS version (if provided).
 
 Apply the macOS version label that matches the reporter’s stated macOS version (if provided).
 
@@ -102,6 +116,7 @@ Search for existing open **and** closed issues that are similar to this one. Use
 - Issues describing the same error, symptom, or feature
 
 If you find a duplicate:
+
 1. Apply the **`duplicate`** label using `add_labels`
 2. Post a comment with `add_comment` pointing to the original issue.
 
@@ -112,6 +127,7 @@ If you also need clarifying info, combine the duplicate notice and questions int
 If the issue description is unclear or missing important information, apply the **`needs-info`** label using `add_labels` and post a single friendly comment using `add_comment`.
 
 For **bug reports**, the following information is required:
+
 - Clear description of the problem
 - Reliable steps to reproduce the bug
 - Expected vs. actual behaviour
@@ -119,6 +135,8 @@ For **bug reports**, the following information is required:
 - macOS version
 
 For **feature requests**, a clear description of the desired behaviour and its use case is sufficient.
+
+For **documentation issues**, a clear description of what is incorrect, missing, or misleading — and where in the docs it appears — is sufficient.
 
 If clarification is needed, post a comment like:
 
