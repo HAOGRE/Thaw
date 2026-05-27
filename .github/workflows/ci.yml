@@ -1,6 +1,6 @@
 name: CI
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.head_ref}}
   cancel-in-progress: true
 on:
   pull_request:
@@ -52,7 +52,7 @@ jobs:
     needs: static_analysis
     steps:
       - uses: actions/checkout@v6
-      
+
       # Issues with other Xcode versions, so we need to specify the version explicitly
       - run: sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer
 
