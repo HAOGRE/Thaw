@@ -76,6 +76,12 @@ final class LayoutBarPaddingView: NSView {
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         guard !isStabilizing else { return [] }
+        // Freeze the destination's arrangedViews so that the cache refresh
+        // triggered while the system move is in flight cannot overwrite the
+        // mid-drag visual state. updateNewItemsPlacement at the end of move()
+        // depends on that state to capture the badge's new neighbors; without
+        // this guard the dropped item bounces to the wrong side of the badge.
+        container.canSetArrangedViews = false
         return container.updateArrangedViewsForDrag(with: sender, phase: .entered)
     }
 
@@ -143,6 +149,7 @@ final class LayoutBarPaddingView: NSView {
         }
 
         var willMove = false
+        let sourceContainer = draggingSource.oldContainerInfo?.container
 
         if let index = arrangedViews.firstIndex(of: draggingSource) {
             if arrangedViews.count == 1 {
@@ -150,30 +157,33 @@ final class LayoutBarPaddingView: NSView {
                 Task {
                     guard case let .item(item) = draggingSource.kind else {
                         self.container.canSetArrangedViews = true
+                        sourceContainer?.canSetArrangedViews = true
                         return
                     }
                     if let destination = await self.liveFallbackDestinationForDraggedItem() {
-                        self.move(item: item, to: destination)
+                        self.move(item: item, to: destination, sourceContainer: sourceContainer)
                     } else {
                         Self.diagLog.error("No target item for layout bar drag")
                         self.container.canSetArrangedViews = true
+                        sourceContainer?.canSetArrangedViews = true
                     }
                 }
             } else if case let .item(item) = draggingSource.kind {
                 if let targetItem = nearestItem(toRightOf: index) {
                     willMove = true
-                    move(item: item, to: .leftOfItem(targetItem))
+                    move(item: item, to: .leftOfItem(targetItem), sourceContainer: sourceContainer)
                 } else if let targetItem = nearestItem(toLeftOf: index) {
                     willMove = true
-                    move(item: item, to: .rightOfItem(targetItem))
+                    move(item: item, to: .rightOfItem(targetItem), sourceContainer: sourceContainer)
                 } else if !arrangedViews.isEmpty {
                     willMove = true
                     Task {
                         if let destination = await self.liveFallbackDestinationForDraggedItem() {
-                            self.move(item: item, to: destination)
+                            self.move(item: item, to: destination, sourceContainer: sourceContainer)
                         } else {
                             Self.diagLog.error("No target item for layout bar drag")
                             self.container.canSetArrangedViews = true
+                            sourceContainer?.canSetArrangedViews = true
                         }
                     }
                 }
@@ -189,7 +199,11 @@ final class LayoutBarPaddingView: NSView {
         return true
     }
 
-    private func move(item: MenuBarItem, to destination: MenuBarItemManager.MoveDestination) {
+    private func move(
+        item: MenuBarItem,
+        to destination: MenuBarItemManager.MoveDestination,
+        sourceContainer: LayoutBarContainer? = nil
+    ) {
         guard let appState = container.appState else {
             return
         }
@@ -221,8 +235,27 @@ final class LayoutBarPaddingView: NSView {
                 await stabilizePlacement(of: item, to: destination, expectedSection: container.section, appState: appState)
             } catch {
                 Self.diagLog.error("Error moving menu bar item: \(error)")
-                let alert = NSAlert(error: error)
-                alert.runModal()
+                // The system event-driven move sometimes throws cannotComplete
+                // after macOS has already settled the item into the requested
+                // slot: the click sequence bounces the item past the target
+                // and back during verification, but a subsequent reconciliation
+                // lands it where the user asked. Resample the cache after a
+                // short settle window and only show the alert when the item
+                // is NOT in the position the user actually dragged it to;
+                // showing it for a move that visibly worked is a false alarm.
+                try? await Task.sleep(for: .milliseconds(250))
+                await appState.itemManager.cacheItemsRegardless(skipRecentMoveCheck: true)
+                if didItemReachIntendedPosition(
+                    item: item,
+                    destination: destination,
+                    expectedSection: container.section,
+                    cache: appState.itemManager.itemCache
+                ) {
+                    Self.diagLog.info("Move verification failed but \(item.logString) reached intended position in \(container.section.logString); suppressing alert")
+                } else {
+                    let alert = NSAlert(error: error)
+                    alert.runModal()
+                }
             }
             watchdogTask.cancel()
             if let appState = container.appState {
@@ -243,10 +276,44 @@ final class LayoutBarPaddingView: NSView {
                         arrangedViews: self.container.arrangedViews
                     )
                 }
-                // Re-enable view updates. The didSet will automatically refresh
-                // from the current cache with the updated badge anchor.
+                // Re-enable view updates on both the destination (frozen by
+                // draggingEntered) and the source (frozen by willBeginAt on
+                // the dragging session). Without resetting the source, its
+                // arrangedViews would stay frozen at the mid-drag snapshot
+                // until the next drag originated from that container.
                 self.container.canSetArrangedViews = true
+                if sourceContainer !== self.container {
+                    sourceContainer?.canSetArrangedViews = true
+                }
             }
+        }
+    }
+
+    /// Returns true when the dragged item is sitting in the slot the user
+    /// asked for: in the destination section, immediately adjacent to the
+    /// target on the requested side. For control-item targets (section
+    /// dividers) there is no array entry to anchor against, so containment
+    /// in the destination section is the strongest claim we can make.
+    private func didItemReachIntendedPosition(
+        item: MenuBarItem,
+        destination: MenuBarItemManager.MoveDestination,
+        expectedSection: MenuBarSection.Name,
+        cache: MenuBarItemManager.ItemCache
+    ) -> Bool {
+        let sectionItems = cache[expectedSection]
+        guard let itemIndex = sectionItems.firstIndex(where: { $0.tag == item.tag }) else {
+            return false
+        }
+        let target = destination.targetItem
+        if target.isControlItem {
+            return true
+        }
+        guard let targetIndex = sectionItems.firstIndex(where: { $0.tag == target.tag }) else {
+            return false
+        }
+        return switch destination {
+        case .leftOfItem: itemIndex + 1 == targetIndex
+        case .rightOfItem: itemIndex == targetIndex + 1
         }
     }
 
