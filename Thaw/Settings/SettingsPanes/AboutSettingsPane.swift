@@ -47,7 +47,7 @@ struct AboutSettingsPane: View {
             if let appIcon = NSImage(named: NSImage.applicationIconName) {
                 let center = Self.iconCenter
                 let tiltX = iconIsHovering ? (iconHoverLocation.y - center) / center * -14 : 0
-                let tiltY = iconIsHovering ? (iconHoverLocation.x - center) / center *  14 : 0
+                let tiltY = iconIsHovering ? (iconHoverLocation.x - center) / center * 14 : 0
                 let shadowX = iconIsHovering ? (iconHoverLocation.x - center) / center * -10 : 0
                 let shadowY = iconIsHovering ? (iconHoverLocation.y - center) / center * -10 : 0
 
@@ -67,7 +67,7 @@ struct AboutSettingsPane: View {
                     .animation(.easeInOut(duration: 0.2), value: iconIsHovering)
                     .onContinuousHover { phase in
                         switch phase {
-                        case .active(let location):
+                        case let .active(location):
                             iconIsHovering = true
                             iconHoverLocation = location
                         case .ended:
