@@ -106,6 +106,15 @@ extension WindowInfo {
     ///
     /// - Parameter windowIDs: A list of window identifiers.
     static func createWindows(from windowIDs: [CGWindowID]) -> [WindowInfo] {
+        // An empty identifier list is a valid, expected input — there are
+        // simply no windows to describe. This happens routinely on macOS 26
+        // (Tahoe) and especially on macOS 27, where the per-item menu bar
+        // window list is frequently empty. `createCGWindowArray` returns nil
+        // by design for an empty list, so return early to avoid logging a
+        // misleading warning on every such call.
+        guard !windowIDs.isEmpty else {
+            return []
+        }
         guard let array = Bridging.createCGWindowArray(with: windowIDs) else {
             diagLog.warning("createWindows: createCGWindowArray returned nil for \(windowIDs.count) window IDs")
             return []
