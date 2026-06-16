@@ -1,30 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Active profile" : {
-      "comment" : "Picker option: save spacing changes to the active profile only when relaunch confirmations are disabled."
-    },
-    "All profiles" : {
-      "comment" : "Picker option: save spacing changes to every profile when relaunch confirmations are disabled."
-    },
-    "Apply menu bar spacing change?" : {
-      "comment" : "Title of the just-in-time confirmation shown before a display transition relaunches menu bar apps to apply new spacing."
-    },
-    "Before a display change or spacing edit relaunches your menu bar apps, Thaw asks you to confirm. Turn this off to apply spacing changes and relaunch apps without confirmation." : {
-      "comment" : "Annotation for the Confirm before relaunching apps toggle in the Displays pane."
-    },
-    "Confirm before relaunching apps" : {
-      "comment" : "Toggle in the Displays pane controlling whether spacing changes ask for confirmation before relaunching menu bar apps."
-    },
-    "Don't ask again" : {
-      "comment" : "Suppression checkbox on the spacing relaunch confirmation; disables future confirmations."
-    },
-    "When a profile is active, choose whether spacing changes save to just the active profile or to every profile." : {
-      "comment" : "Annotation for the profile-target picker shown when relaunch confirmations are disabled."
-    },
-    "Without confirmation, save spacing to" : {
-      "comment" : "Label for the picker choosing which profiles receive a spacing change when relaunch confirmations are disabled."
-    },
     "(no script selected)" : {
       "comment" : "A placeholder displayed in the \"Path\" column of a hook row when no script is selected.",
       "localizations" : {
@@ -2922,6 +2898,9 @@
         }
       }
     },
+    "Active profile" : {
+      "comment" : "Picker option: save spacing changes to the active profile only when relaunch confirmations are disabled."
+    },
     "Adaptive" : {
       "comment" : "Text for the adaptive background option in the menu bar.",
       "localizations" : {
@@ -3516,6 +3495,9 @@
           }
         }
       }
+    },
+    "All profiles" : {
+      "comment" : "Picker option: save spacing changes to every profile when relaunch confirmations are disabled."
     },
     "Allow" : {
       "comment" : "Button title for allowing the app to control Thaw settings.",
@@ -5191,6 +5173,9 @@
           }
         }
       }
+    },
+    "Apply menu bar spacing change?" : {
+      "comment" : "Title of the just-in-time confirmation shown before a display transition relaunches menu bar apps to apply new spacing."
     },
     "Apply spacing change?" : {
       "comment" : "Title of the alert shown before applying a menu bar item spacing change.",
@@ -8182,6 +8167,9 @@
         }
       }
     },
+    "Before a display change or spacing edit relaunches your menu bar apps, Thaw asks you to confirm. Turn this off to apply spacing changes and relaunch apps without confirmation." : {
+      "comment" : "Annotation for the Confirm before relaunching apps toggle in the Displays pane."
+    },
     "BETA" : {
       "comment" : "The text displayed in the badge.",
       "localizations" : {
@@ -9369,6 +9357,125 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "更改選單列的外觀。"
+          }
+        }
+      }
+    },
+    "Changing the language will immediately restart %@." : {
+      "comment" : "A note below the language picker explaining that changing the language will immediately restart the app. %@ is the app name.",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Změna jazyka okamžitě restartuje %@."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ändern der Sprache startet %@ sofort neu."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar el idioma reiniciará %@ inmediatamente."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer la langue redémarrera immédiatement %@."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A nyelv módosítása azonnal újraindítja a következőt: %@."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mengubah bahasa akan segera memulai ulang %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La modifica della lingua riavvierà immediatamente %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "言語を変更すると、%@ がすぐに再起動します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "언어를 변경하면 %@이(가) 즉시 재시작됩니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het wijzigen van de taal herstart %@ onmiddellijk."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zmiana języka spowoduje natychmiastowe ponowne uruchomienie %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alterar o idioma reiniciará %@ imediatamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменение языка немедленно перезапустит %@."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "การเปลี่ยนภาษาจะรีสตาร์ท %@ ทันที"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dili değiştirmek %@ uygulamasını hemen yeniden başlatacak."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зміна мови негайно перезапустить %@."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thay đổi ngôn ngữ sẽ khởi động lại %@ ngay lập tức."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更改语言将立即重启 %@。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更改語言將立即重新啟動 %@。"
           }
         }
       }
@@ -11637,6 +11744,9 @@
         }
       }
     },
+    "Confirm before relaunching apps" : {
+      "comment" : "Toggle in the Displays pane controlling whether spacing changes ask for confirmation before relaunching menu bar apps."
+    },
     "Conflicting Menu Bar Manager Detected" : {
       "comment" : "Title of an alert that appears when a conflicting menu bar manager is detected.",
       "localizations" : {
@@ -11752,17 +11862,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "偵測到衝突的選單列管理工具"
-          }
-        }
-      }
-    },
-    "When a display transition requires Thaw to apply a different menu bar spacing, Thaw relaunches apps with menu bar items. Relaunching apps may cause unsaved input, progress, or transient app state to be lost." : {
-      "comment" : "A warning that a display transition requiring a different menu bar spacing relaunches menu bar apps, which can lose unsaved state.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "When a display transition requires Thaw to apply a different menu bar spacing, Thaw relaunches apps with menu bar items. Relaunching apps may cause unsaved input, progress, or transient app state to be lost."
           }
         }
       }
@@ -14269,6 +14368,9 @@
           }
         }
       }
+    },
+    "Don't ask again" : {
+      "comment" : "Suppression checkbox on the spacing relaunch confirmation; disables future confirmations."
     },
     "Don't Check" : {
       "comment" : "A button that disables automatic update checking.",
@@ -23220,6 +23322,125 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "保留搜尋"
+          }
+        }
+      }
+    },
+    "Language" : {
+      "comment" : "A label for the language picker in General settings.",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jazyk"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprache"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idioma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langue"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nyelv"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bahasa"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lingua"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "言語"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "언어"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taal"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Język"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idioma"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Язык"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ภาษา"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dil"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мова"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ngôn ngữ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "语言"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "語言"
           }
         }
       }
@@ -45399,6 +45620,125 @@
         }
       }
     },
+    "Use System Language" : {
+      "comment" : "A menu item in the language picker that resets the app language to follow the system language.",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Použít jazyk systému"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemsprache verwenden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar el idioma del sistema"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser la langue du système"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rendszer nyelvének használata"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gunakan Bahasa Sistem"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa la lingua di sistema"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム言語を使用"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시스템 언어 사용"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systeemtaal gebruiken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Użyj języka systemu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar idioma do sistema"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Использовать язык системы"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ใช้ภาษาของระบบ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem Dilini Kullan"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використовувати мову системи"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dùng ngôn ngữ hệ thống"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用系统语言"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用系統語言"
+          }
+        }
+      }
+    },
     "Use the faster LCS (Longest Common Subsequence) algorithm for profile sorting on notched displays instead of the full sort. LCS minimises the number of moves but may be less reliable on notched displays with smaller resolutions." : {
       "comment" : "A tooltip that explains the purpose of a setting.",
       "localizations" : {
@@ -46236,6 +46576,20 @@
     "Welcome to Thaw" : {
       "comment" : "Title of the welcome onboarding slide."
     },
+    "When a display transition requires Thaw to apply a different menu bar spacing, Thaw relaunches apps with menu bar items. Relaunching apps may cause unsaved input, progress, or transient app state to be lost." : {
+      "comment" : "A warning that a display transition requiring a different menu bar spacing relaunches menu bar apps, which can lose unsaved state.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "When a display transition requires Thaw to apply a different menu bar spacing, Thaw relaunches apps with menu bar items. Relaunching apps may cause unsaved input, progress, or transient app state to be lost."
+          }
+        }
+      }
+    },
+    "When a profile is active, choose whether spacing changes save to just the active profile or to every profile." : {
+      "comment" : "Annotation for the profile-target picker shown when relaunch confirmations are disabled."
+    },
     "When an app sends a thaw:// URL to change settings, Thaw checks if that app is whitelisted." : {
       "comment" : "A step in the process of how to use Thaw.",
       "localizations" : {
@@ -46598,6 +46952,9 @@
           }
         }
       }
+    },
+    "Without confirmation, save spacing to" : {
+      "comment" : "Label for the picker choosing which profiles receive a spacing change when relaunch confirmations are disabled."
     },
     "Would you like to import your existing configuration?" : {
       "comment" : "A question displayed to the user when they first open the app, asking if they would like to import their existing configuration.",
