@@ -1,0 +1,140 @@
+name: "i18n Lint"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "Thaw/Resources/Localizable.xcstrings"
+      - "**/*.swift"
+
+jobs:
+  lint:
+    runs-on: ubuntu-slim
+    permissions:
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate xcstrings JSON
+        run: |
+          python3 -c "
+          import json, sys
+          path = 'Thaw/Resources/Localizable.xcstrings'
+          try:
+              with open(path) as f:
+                  json.load(f)
+              print('✓ Localizable.xcstrings is valid JSON')
+          except json.JSONDecodeError as e:
+              print(f'✗ JSON parse error: {e}', file=sys.stderr)
+              sys.exit(1)
+          "
+
+      - name: Report translation coverage
+        id: coverage
+        run: |
+          python3 - <<'EOF'
+          import json, os
+
+          with open("Thaw/Resources/Localizable.xcstrings") as f:
+              data = json.load(f)
+
+          strings = data.get("strings", {})
+          total = len(strings)
+
+          lang_stats = {}
+          for key, entry in strings.items():
+              locs = entry.get("localizations", {})
+              for lang, loc_data in locs.items():
+                  if lang == "en":
+                      continue
+                  state = ""
+                  if "stringUnit" in loc_data:
+                      state = loc_data["stringUnit"].get("state", "")
+                  elif "variations" in loc_data:
+                      # plural/device variations: check first variant
+                      for var_type, variants in loc_data["variations"].items():
+                          for var_key, var_val in variants.items():
+                              if "stringUnit" in var_val:
+                                  state = var_val["stringUnit"].get("state", "")
+                              break
+                          break
+                  if lang not in lang_stats:
+                      lang_stats[lang] = {"translated": 0, "new": 0, "missing": 0}
+                  if state == "translated":
+                      lang_stats[lang]["translated"] += 1
+                  elif state == "new":
+                      lang_stats[lang]["new"] += 1
+                  else:
+                      lang_stats[lang]["missing"] += 1
+
+          # Count languages never appearing in any entry
+          all_langs = set(lang_stats.keys())
+          for key, entry in strings.items():
+              locs = entry.get("localizations", {})
+              for lang in all_langs:
+                  if lang not in locs:
+                      lang_stats[lang]["missing"] = lang_stats[lang].get("missing", 0) + 1
+
+          lines = ["| Language | Translated | Needs translation | Coverage |",
+                   "|----------|-----------|-------------------|----------|"]
+          for lang in sorted(lang_stats):
+              s = lang_stats[lang]
+              t = s["translated"]
+              n = s["new"] + s["missing"]
+              pct = round(t / total * 100) if total else 0
+              lines.append(f"| `{lang}` | {t} | {n} | {pct}% |")
+
+          report = "\n".join(lines)
+          print(report)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              # Escape newlines for GitHub Actions output
+              escaped = report.replace("%", "%25").replace("\n", "%0A").replace("\r", "%0D")
+              f.write(f"table={escaped}\n")
+              f.write(f"total={total}\n")
+          EOF
+
+      - name: Post coverage comment
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const table = `${{ steps.coverage.outputs.table }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
+            const total = `${{ steps.coverage.outputs.total }}`;
+
+            const body = [
+              '### 🌐 Translation Coverage',
+              '',
+              `**${total}** localizable strings in this PR.`,
+              '',
+              table,
+              '',
+              '_Strings marked "needs translation" will be picked up by Crowdin after merging._',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('🌐 Translation Coverage')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

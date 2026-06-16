@@ -34,9 +34,10 @@ What does this PR change or add?
 
 - [ ] I’ve built and run the app locally
 - [ ] I’ve checked for console errors or crashes
-- [ ] I've run relevant tests and they pass
-- [ ] I've added or updated tests (if applicable)
-- [ ] I've updated documentation as needed
+- [ ] I’ve run relevant tests and they pass
+- [ ] I’ve added or updated tests (if applicable)
+- [ ] I’ve updated documentation as needed
+- [ ] Any new user-visible strings have been added to `Thaw/Resources/Localizable.xcstrings` (Crowdin will handle translations)
 
 ## Other information
 
