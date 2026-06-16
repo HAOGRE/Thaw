@@ -120,7 +120,7 @@ Thaw is currently available in the following languages:
         <td></td>
         <td><b>简体中文</b></td>
         <td align="center">🇨🇳</td>
-        <td><img alt="zh-CN translation" src="https://img.shields.io/badge/dynamic/json?color=blue&label=zh-CN&style=flat-square&logo=crowdin&query=%24.progress.17.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-12858911-889934.json" /></td>
+        <td><img alt="zh-CN translation" src="https://img.shields.io/badge/zh--CN-100%25-blue?style=flat-square&logo=crowdin" /></td>
     </tr>
     <tr>
         <td><b>正體中文</b></td>
