@@ -9695,7 +9695,21 @@
       }
     },
     "Choose which menu bar sections appear in the search panel, and in what order. Use the up and down buttons to reorder, and turn off a section to exclude its items from search results." : {
-      "comment" : "Description for the Search section in the Advanced settings pane that controls which menu bar sections appear in the menu bar search panel and in what order."
+      "comment" : "Description for the Search section in the Advanced settings pane that controls which menu bar sections appear in the menu bar search panel and in what order.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择哪些菜单栏分组显示在搜索面板中及其顺序。使用上下按钮重新排序，关闭某个分组可将其项目从搜索结果中排除。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇哪些選單列區段顯示在搜尋面板中及其順序。使用上下按鈕重新排序，關閉某個區段可將其項目從搜尋結果中排除。"
+          }
+        }
+      }
     },
     "Clear" : {
       "comment" : "A glass style that is clear.",
@@ -25174,7 +25188,21 @@
       }
     },
     "Move down" : {
-      "comment" : "Accessibility label for the down-chevron button that reorders a row to a lower position in a list."
+      "comment" : "Accessibility label for the down-chevron button that reorders a row to a lower position in a list.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下移"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下移"
+          }
+        }
+      }
     },
     "Move menu bar items from the visible section into the hidden section when they don't fit beside the notch on a notched display. Disable to keep the saved profile layout exactly as authored even when items would otherwise be pushed under the notch." : {
       "comment" : "A tooltip that describes the effect of enabling or disabling the overflow.",
@@ -25415,7 +25443,21 @@
       }
     },
     "Move up" : {
-      "comment" : "Accessibility label for the up-chevron button that reorders a row to a higher position in a list."
+      "comment" : "Accessibility label for the up-chevron button that reorders a row to a higher position in a list.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上移"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上移"
+          }
+        }
+      }
     },
     "Never" : {
       "comment" : "Text displayed in the \"Last update check\" section of the about settings pane, indicating that the last update check date is unknown.",
@@ -33391,7 +33433,21 @@
       }
     },
     "Search" : {
-      "comment" : "The header of the Search section in the Advanced settings pane."
+      "comment" : "The header of the Search section in the Advanced settings pane.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜尋"
+          }
+        }
+      }
     },
     "Search menu bar items" : {
       "comment" : "A description of an action that searches menu bar items.",
@@ -44109,14 +44165,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Apply spacing change?"
+            "state" : "translated",
+            "value" : "应用间距更改？"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Apply spacing change?"
+            "state" : "translated",
+            "value" : "套用間距變更？"
           }
         }
       }
@@ -44228,14 +44284,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Applying this spacing change will briefly relaunch all apps with menu bar items."
+            "state" : "translated",
+            "value" : "应用此间距更改将短暂重新启动所有带有菜单栏图标的应用程序。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Applying this spacing change will briefly relaunch all apps with menu bar items."
+            "state" : "translated",
+            "value" : "套用此間距變更將短暫重新啟動所有含有選單列項目的應用程式。"
           }
         }
       }
@@ -44347,14 +44403,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Applying this spacing change will briefly relaunch all apps with menu bar items. Save the new spacing to the active profile \"%@\", or save it to every profile."
+            "state" : "translated",
+            "value" : "应用此间距更改将短暂重新启动所有带有菜单栏图标的应用程序。将新间距保存到当前配置文件“%@”，或保存到所有配置文件。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Applying this spacing change will briefly relaunch all apps with menu bar items. Save the new spacing to the active profile \"%@\", or save it to every profile."
+            "state" : "translated",
+            "value" : "套用此間距變更將短暫重新啟動所有含有選單列項目的應用程式。將新間距儲存至使用中的設定檔「%@」，或儲存至所有設定檔。"
           }
         }
       }
@@ -44466,14 +44522,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Save the new spacing to the active profile \"%@\", or save it to every profile."
+            "state" : "translated",
+            "value" : "将新间距保存到当前配置文件“%@”，或保存到所有配置文件。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Save the new spacing to the active profile \"%@\", or save it to every profile."
+            "state" : "translated",
+            "value" : "將新間距儲存至使用中的設定檔「%@」，或儲存至所有設定檔。"
           }
         }
       }
@@ -44585,14 +44641,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Update Active Profile"
+            "state" : "translated",
+            "value" : "更新当前配置文件"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Update Active Profile"
+            "state" : "translated",
+            "value" : "更新使用中的設定檔"
           }
         }
       }
@@ -44704,61 +44760,204 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Update All Profiles"
+            "state" : "translated",
+            "value" : "更新所有配置文件"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Update All Profiles"
+            "state" : "translated",
+            "value" : "更新所有設定檔"
           }
         }
       }
     },
     "Always show hidden menu bar items in the menu bar." : {
       "comment" : "Annotation for the Always-show-hidden-items toggle in the Global section of the Displays pane.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "始终在菜单栏中显示隐藏的菜单栏图标。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一律在選單列中顯示隱藏的選單列項目。"
+          }
+        }
+      }
     },
     "Apply global settings to all displays?" : {
       "comment" : "Title of the alert shown before applying the global display template to every known display.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将全局设置应用到所有显示器？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將全域設定套用至所有顯示器？"
+          }
+        }
+      }
     },
     "Apply the global template above to every connected and previously-seen display. Newly connected displays are also seeded from this template." : {
       "comment" : "Annotation under the Apply-to-All-Displays button in the Global section of the Displays pane.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将上方的全局模板应用到所有已连接和曾经连接过的显示器。新连接的显示器也将以此模板为初始配置。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將上方的全域範本套用至所有已連接及曾連接過的顯示器。新連接的顯示器也將以此範本作為初始設定。"
+          }
+        }
+      }
     },
     "Apply to All Displays" : {
       "comment" : "Button in the Global section of the Displays pane that broadcasts the global template to every known display.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用到所有显示器"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "套用至所有顯示器"
+          }
+        }
+      }
     },
     "Applying briefly relaunches apps with menu bar items so they pick up the new spacing." : {
       "comment" : "Annotation under the spacing slider in the Global section of the Displays pane.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用操作将短暂重新启动带有菜单栏图标的应用程序，以使其获取新的间距设置。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "套用操作將短暫重新啟動含有選單列項目的應用程式，以讀取新的間距設定。"
+          }
+        }
+      }
     },
     "Broadcast" : {
       "comment" : "Label for the row that contains the Apply-to-All-Displays button in the Global section of the Displays pane.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "广播"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "廣播"
+          }
+        }
+      }
     },
     "Global" : {
       "comment" : "Header of the Global section at the top of the Displays pane.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全局"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全域"
+          }
+        }
+      }
     },
     "Not available because the %@ Bar is enabled in the global template." : {
       "comment" : "Annotation shown when the Always-show-hidden-items toggle in the Global section is disabled because Use Thaw Bar is enabled in the global template. %@ is the Thaw display name.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不可用，因为全局模板中已启用 %@ 栏。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法使用，因為全域範本中已啟用 %@ 列。"
+          }
+        }
+      }
     },
     "Show hidden menu bar items in a separate bar below the menu bar." : {
       "comment" : "Annotation under the Use-Thaw-Bar toggle in the Global section of the Displays pane.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在菜单栏下方的独立栏中显示隐藏的菜单栏图标。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在選單列下方的獨立列中顯示隱藏的選單列項目。"
+          }
+        }
+      }
     },
     "This will overwrite the settings of %d display(s) with the global template and may briefly relaunch apps with menu bar items." : {
       "comment" : "Alert message variant shown before applying the global template to all displays when no profile is active. %d is the number of affected displays.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这将使用全局模板覆盖 %d 个显示器的设置，并可能短暂重新启动带有菜单栏图标的应用程序。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這將以全域範本覆寫 %d 個顯示器的設定，並可能短暫重新啟動含有選單列項目的應用程式。"
+          }
+        }
+      }
     },
     "This will overwrite the settings of %d display(s) with the global template and may briefly relaunch apps with menu bar items. Save the global template to the active profile \"%@\", or save it to every profile." : {
       "comment" : "Alert message variant shown before applying the global template to all displays while a profile is active. %d is the number of affected displays. %@ is the active profile name.",
-      "localizations" : {}
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这将使用全局模板覆盖 %d 个显示器的设置，并可能短暂重新启动带有菜单栏图标的应用程序。将全局模板保存到当前配置文件“%@”，或保存到所有配置文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這將以全域範本覆寫 %d 個顯示器的設定，並可能短暫重新啟動含有選單列項目的應用程式。將全域範本儲存至使用中的設定檔「%@」，或儲存至所有設定檔。"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
