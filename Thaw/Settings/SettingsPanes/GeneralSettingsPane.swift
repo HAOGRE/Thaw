@@ -15,6 +15,23 @@ struct GeneralSettingsPane: View {
     @State private var isImportingCustomIceIcon = false
     @State private var isPresentingError = false
     @State private var presentedError: LocalizedErrorWrapper?
+    @State private var selectedLanguageTag: String = Self.currentLanguageTag
+
+    /// Returns the language tag that the app itself has overridden, or `"system"` if no
+    /// app-level override exists. We must not use `UserDefaults.standard` directly because
+    /// it inherits the global `AppleLanguages` domain (e.g. `["en-CN", "zh-Hans-CN"]`) when
+    /// no app-specific value is set, making it impossible to distinguish "user picked English"
+    /// from "user picked Use System Language".
+    private static var currentLanguageTag: String {
+        let appDomain = Bundle.main.bundleIdentifier ?? ""
+        let appDefaults = UserDefaults.standard.persistentDomain(forName: appDomain)
+        guard let tag = (appDefaults?["AppleLanguages"] as? [String])?.first else {
+            return "system"
+        }
+        // Normalise e.g. "zh-Hans-CN" → "zh-Hans" to match SupportedLanguage identifiers
+        let normalised = SupportedLanguage.allCases.first { tag.hasPrefix($0.identifier) }?.identifier
+        return normalised ?? tag
+    }
 
     private var rehideIntervalKey: LocalizedStringKey {
         let count = Int(settings.rehideInterval)
@@ -50,24 +67,8 @@ struct GeneralSettingsPane: View {
 
     // MARK: Language Picker
 
-    /// The BCP 47 tag for the currently selected language, or "system" if no
-    /// override has been set (i.e. the app follows the system language).
-    private var currentLanguageTag: String {
-        (UserDefaults.standard.array(forKey: "AppleLanguages") as? [String])?.first ?? "system"
-    }
-
     private var languagePicker: some View {
-        IcePicker("Language", selection: Binding(
-            get: { currentLanguageTag },
-            set: { newTag in
-                if newTag == "system" {
-                    UserDefaults.standard.removeObject(forKey: "AppleLanguages")
-                } else {
-                    UserDefaults.standard.set([newTag], forKey: "AppleLanguages")
-                }
-                appState.restartSelf()
-            }
-        )) {
+        IcePicker("Language", selection: $selectedLanguageTag) {
             Text("Use System Language").tag("system")
             Divider()
             ForEach(SupportedLanguage.allCases) { lang in
@@ -75,6 +76,17 @@ struct GeneralSettingsPane: View {
             }
         }
         .annotation("Changing the language will immediately restart \(Constants.displayName).")
+        .onAppear {
+            selectedLanguageTag = Self.currentLanguageTag
+        }
+        .onChange(of: selectedLanguageTag) { newTag in
+            if newTag == "system" {
+                UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+            } else {
+                UserDefaults.standard.set([newTag], forKey: "AppleLanguages")
+            }
+            appState.restartSelf()
+        }
     }
 
     // MARK: Ice Icon Options
