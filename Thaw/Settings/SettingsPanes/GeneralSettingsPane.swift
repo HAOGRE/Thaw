@@ -40,10 +40,41 @@ struct GeneralSettingsPane: View {
 
     // MARK: App Options
 
+    @ViewBuilder
     private var appOptions: some View {
         LaunchAtLogin.Toggle {
             Text("Launch at Login")
         }
+        languagePicker
+    }
+
+    // MARK: Language Picker
+
+    /// The BCP 47 tag for the currently selected language, or "system" if no
+    /// override has been set (i.e. the app follows the system language).
+    private var currentLanguageTag: String {
+        (UserDefaults.standard.array(forKey: "AppleLanguages") as? [String])?.first ?? "system"
+    }
+
+    private var languagePicker: some View {
+        IcePicker("Language", selection: Binding(
+            get: { currentLanguageTag },
+            set: { newTag in
+                if newTag == "system" {
+                    UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+                } else {
+                    UserDefaults.standard.set([newTag], forKey: "AppleLanguages")
+                }
+                appState.restartSelf()
+            }
+        )) {
+            Text("Use System Language").tag("system")
+            Divider()
+            ForEach(SupportedLanguage.allCases) { lang in
+                Text(lang.localName).tag(lang.identifier)
+            }
+        }
+        .annotation("Changing the language will immediately restart \(Constants.displayName).")
     }
 
     // MARK: Ice Icon Options
